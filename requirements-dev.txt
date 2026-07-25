@@ -1,0 +1,3 @@
+# Extra dependencies only needed to run the test suite, not for running the app itself.
+pytest==9.1.1
+pypdf==5.9.0

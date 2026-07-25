@@ -1,0 +1,28 @@
+# All versions below were installed together and verified working in this
+# project (imports checked, full test suite run) as of July 2026.
+
+# --- Web framework ---
+fastapi==0.140.0
+uvicorn[standard]==0.51.0
+python-multipart==0.0.20
+
+# --- Config ---
+python-dotenv==1.2.2
+pydantic==2.13.4
+pydantic-settings==2.14.2
+
+# --- Transcript retrieval (Phase 1) ---
+youtube-transcript-api==1.2.4
+
+# --- Whisper fallback path (Phase 1, only needed if a video has no captions) ---
+yt-dlp==2026.7.4
+faster-whisper==1.2.1
+
+# --- LLM (Phase 2/4) ---
+google-genai==2.14.0
+
+# --- PDF generation (Phase 5) ---
+reportlab==4.4.10
+
+# --- Misc ---
+httpx==0.28.1
