@@ -314,3 +314,88 @@ def _parse_json_or_raise(response) -> dict:
         return json.loads(text)
     except json.JSONDecodeError as e:
         raise SummarizationError(f"Gemini did not return valid JSON: {e}") from e
+
+
+# ---------------------------------------------------------------------------
+# Phase 8 — Q&A chatbot over video summary
+# ---------------------------------------------------------------------------
+
+_QA_PROMPT = """\
+You are a knowledgeable AI assistant. The user has generated a detailed summary \
+of a YouTube video and now wants to ask questions about it. Use ONLY the \
+information from the summary below to answer the user's question. If the answer \
+is not contained in the summary, say so honestly.
+
+Be concise but thorough. Use specific facts, numbers, and details from the summary.
+
+Video Summary:
+Title: {title}
+Overview: {overview}
+
+Key Takeaways:
+{takeaways}
+
+Sections:
+{sections}
+
+Key Terms:
+{terms}
+
+Q&A from Summary:
+{qa}
+
+Conclusion: {conclusion}
+
+---
+User Question: {question}
+"""
+
+
+def answer_question(summary: VideoSummary, question: str) -> str:
+    """Answer a user question using only the video summary as context."""
+    client = get_client()
+
+    takeaways = "\n".join(f"- {t}" for t in (summary.key_takeaways or []))
+
+    sections_text = ""
+    for i, sec in enumerate(summary.sections or []):
+        sections_text += f"\n### {i+1}. {sec.heading}"
+        if sec.timestamp:
+            sections_text += f" [{sec.timestamp}]"
+        sections_text += "\n"
+        for b in (sec.bullets or []):
+            sections_text += f"  - {b}\n"
+        if sec.detail:
+            sections_text += f"  Detail: {sec.detail}\n"
+        if sec.key_quote:
+            sections_text += f'  Quote: "{sec.key_quote}"\n'
+
+    terms_text = "\n".join(
+        f"- {kt.term}: {kt.definition}"
+        for kt in (summary.key_terms or [])
+    )
+
+    qa_text = "\n".join(
+        f"Q: {qa.question}\nA: {qa.answer}"
+        for qa in (summary.deep_dive_qa or [])
+    )
+
+    prompt = _QA_PROMPT.format(
+        title=summary.title or "",
+        overview=summary.overview or "",
+        takeaways=takeaways or "(none)",
+        sections=sections_text or "(none)",
+        terms=terms_text or "(none)",
+        qa=qa_text or "(none)",
+        conclusion=summary.conclusion or "(none)",
+        question=question,
+    )
+
+    response = client.models.generate_content(
+        model=settings.gemini_model,
+        contents=prompt,
+    )
+    text = getattr(response, "text", None)
+    if not text:
+        raise SummarizationError("Empty response from Gemini for Q&A")
+    return text.strip()

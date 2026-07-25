@@ -194,3 +194,10 @@ class JobRecord(BaseModel):
     updated_at: float
 
 
+class ChatRequest(BaseModel):
+    job_id: str = Field(description="Job ID to ask questions about")
+    question: str = Field(description="User question about the video content")
+
+
+class ChatResponse(BaseModel):
+    answer: str = Field(description="AI answer based on the video summary")

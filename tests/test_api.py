@@ -93,6 +93,68 @@ def test_full_pipeline_with_mocked_transcript_and_llm(monkeypatch):
     assert download_res.headers["content-type"] == "application/pdf"
     assert len(download_res.content) > 500
 
+    # Test preview endpoint returns inline PDF
+    preview_res = client.get(f"/preview/{job_id}")
+    assert preview_res.status_code == 200
+    assert preview_res.headers["content-type"] == "application/pdf"
+    assert "inline" in preview_res.headers.get("content-disposition", "")
+
+
+def test_preview_unknown_job_404():
+    res = client.get("/preview/does-not-exist")
+    assert res.status_code == 404
+
+
+def test_chat_unknown_job_404():
+    res = client.post("/chat", json={"job_id": "does-not-exist", "question": "What?"})
+    assert res.status_code == 404
+
+
+def test_chat_with_completed_job(monkeypatch):
+    """Test the /chat endpoint returns an answer for a completed job."""
+    fake_transcript = TranscriptResult(
+        video_id="dQw4w9WgXcQ",
+        language_code="en",
+        is_generated=False,
+        source="captions",
+        segments=[
+            TranscriptSegment(text="hello world", start=0.0, duration=2.0),
+        ],
+    )
+    fake_summary = VideoSummary(
+        title="Chat Test Video",
+        overview="This video explains testing.",
+        key_takeaways=["Testing is important"],
+        sections=[],
+    )
+
+    monkeypatch.setattr("app.jobs.get_transcript", lambda url: fake_transcript)
+    monkeypatch.setattr("app.jobs.needs_chunking", lambda text: False)
+    monkeypatch.setattr("app.jobs.summarize_single", lambda *args, **kwargs: fake_summary)
+
+    # Create and complete a job
+    res = client.post("/summarize", json={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"})
+    assert res.status_code == 200
+    job_id = res.json()["job_id"]
+
+    # Wait for completion
+    deadline = time.time() + 5
+    while time.time() < deadline:
+        status_res = client.get(f"/status/{job_id}")
+        job = status_res.json()
+        if job["status"] in (JobStatus.DONE.value, JobStatus.ERROR.value):
+            break
+        time.sleep(0.1)
+
+    assert job["status"] == JobStatus.DONE.value
+
+    # Mock answer_question to avoid real API call
+    monkeypatch.setattr("app.main.answer_question", lambda summary, question: "Mocked answer about testing")
+
+    chat_res = client.post("/chat", json={"job_id": job_id, "question": "What is this about?"})
+    assert chat_res.status_code == 200
+    assert "Mocked answer" in chat_res.json()["answer"]
+
 
 if __name__ == "__main__":
     sys.exit(pytest.main([__file__, "-v"]))

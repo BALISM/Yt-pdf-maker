@@ -24,8 +24,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
 from app.jobs import create_job, get_job, run_pipeline
-from app.models import JobStatus, SummarizeRequest, SummarizeResponse, VideoSummary
-from app.summarizer import SummarizationError, summarize_single
+from app.models import ChatRequest, ChatResponse, JobStatus, SummarizeRequest, SummarizeResponse, VideoSummary
+from app.summarizer import SummarizationError, answer_question, summarize_single
 from app.transcript import (
     InvalidYouTubeURL,
     NoTranscriptAvailable,
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="YouTube -> PDF Summary Generator",
     description="Paste a YouTube URL, get back a structured PDF summary.",
-    version="1.0.0",
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -127,6 +127,46 @@ def download(job_id: str):
 
     download_name = f"{job.video_title or 'summary'}.pdf".replace("/", "-")
     return FileResponse(pdf_path, media_type="application/pdf", filename=download_name)
+
+
+@app.get("/preview/{job_id}", tags=["pipeline"])
+def preview(job_id: str):
+    """Serve the PDF inline for browser preview (Content-Disposition: inline)."""
+    job = get_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Unknown job_id")
+    if job.status != JobStatus.DONE or not job.pdf_filename:
+        raise HTTPException(status_code=409, detail=f"Job is not finished yet (status={job.status})")
+
+    pdf_path = settings.output_path / job.pdf_filename
+    if not pdf_path.exists():
+        raise HTTPException(status_code=404, detail="PDF file not found on disk")
+
+    return FileResponse(
+        pdf_path,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "inline"},
+    )
+
+
+# ---------------------------------------------------------------------------
+# Phase 8 — Q&A chatbot endpoint
+# ---------------------------------------------------------------------------
+
+@app.post("/chat", response_model=ChatResponse, tags=["chat"])
+def chat(payload: ChatRequest):
+    """Answer a question about a completed video summary."""
+    job = get_job(payload.job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Unknown job_id")
+    if job.status != JobStatus.DONE or not job.summary:
+        raise HTTPException(status_code=409, detail="Job is not finished or has no summary")
+
+    try:
+        answer = answer_question(job.summary, payload.question)
+        return ChatResponse(answer=answer)
+    except SummarizationError as e:
+        raise HTTPException(status_code=502, detail=str(e)) from e
 
 
 @app.get("/health", tags=["meta"])
