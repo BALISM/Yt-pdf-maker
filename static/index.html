@@ -3,225 +3,1335 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>YouTube → PDF Summary</title>
+<title>YouTube Knowledge Engine — AI Executive PDF Generator</title>
+
+<!-- Modern Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 <style>
   :root {
-    --accent: #4a6fa5;
-    --bg: #fafafa;
-    --card: #ffffff;
-    --border: #e2e2e2;
-    --text: #1a1a1a;
-    --muted: #666666;
+    --bg-dark: #070B14;
+    --card-bg: rgba(15, 23, 42, 0.7);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-border-glow: rgba(99, 102, 241, 0.3);
+    --primary: #6366F1;
+    --primary-hover: #4F46E5;
+    --accent-teal: #14B8A6;
+    --accent-purple: #A855F7;
+    --accent-rose: #F43F5E;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --text-dim: #64748B;
+    --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
   }
-  * { box-sizing: border-box; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    padding: 40px 20px;
+    font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    min-height: 100vh;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    overflow-x: hidden;
+    padding-bottom: 60px;
   }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 32px;
-    max-width: 560px;
+
+  /* Animated Ambient Mesh Background Orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 0;
+    animation: floatOrb 20s infinite ease-in-out alternate;
+  }
+
+  .orb-1 {
+    top: -100px;
+    left: 10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, #6366F1 0%, rgba(99, 102, 241, 0) 70%);
+  }
+
+  .orb-2 {
+    top: 250px;
+    right: 5%;
+    width: 550px;
+    height: 550px;
+    background: radial-gradient(circle, #A855F7 0%, rgba(168, 85, 247, 0) 70%);
+    animation-delay: -7s;
+  }
+
+  .orb-3 {
+    bottom: 50px;
+    left: 20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, #0D9488 0%, rgba(13, 148, 136, 0) 70%);
+    animation-delay: -14s;
+  }
+
+  @keyframes floatOrb {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(40px, -30px) scale(1.1); }
+    100% { transform: translate(-30px, 40px) scale(0.95); }
+  }
+
+  /* Grid Overlay Pattern */
+  .grid-pattern {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Layout Container */
+  .app-container {
+    position: relative;
+    z-index: 1;
     width: 100%;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-  }
-  h1 {
-    font-size: 22px;
-    margin: 0 0 6px;
-  }
-  p.subtitle {
-    color: var(--muted);
-    margin: 0 0 24px;
-    font-size: 14px;
-  }
-  form {
+    max-width: 900px;
+    padding: 30px 20px;
     display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* Navigation Header */
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -0.5px;
+  }
+
+  .brand-icon {
+    width: 38px;
+    height: 38px;
+    background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
     gap: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-teal);
+    background: rgba(20, 184, 166, 0.1);
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid rgba(20, 184, 166, 0.2);
   }
-  input[type="text"] {
-    flex: 1;
-    padding: 12px 14px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent-teal);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent-teal);
+    animation: pulse 2s infinite;
   }
-  input[type="text"]:focus {
-    outline: 2px solid var(--accent);
-    outline-offset: -1px;
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.6; }
   }
-  button {
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 12px 20px;
-    font-size: 14px;
+
+  /* Hero Section */
+  .hero {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 10px;
+  }
+
+  .hero-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #A5B4FC;
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    padding: 6px 16px;
+    border-radius: 30px;
+  }
+
+  .hero-title {
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #FFFFFF 30%, #C7D2FE 70%, #A855F7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+    color: var(--text-muted);
+    max-width: 640px;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  /* Main Glass Card */
+  .glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 36px;
+    box-shadow: var(--glass-shadow);
+    transition: border-color 0.3s ease;
+  }
+
+  .glass-card:hover {
+    border-color: rgba(99, 102, 241, 0.25);
+  }
+
+  /* Input Form */
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 18px;
+    color: #818CF8;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+  }
+
+  .url-input {
+    width: 100%;
+    padding: 18px 140px 18px 52px;
+    background: rgba(8, 14, 27, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    font-size: 15px;
+    font-family: inherit;
+    color: var(--text-main);
+    outline: none;
+    transition: all 0.3s ease;
+  }
+
+  .url-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.3);
+    background: rgba(15, 23, 42, 0.9);
+  }
+
+  .input-actions {
+    position: absolute;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .icon-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-muted);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
-  button:disabled {
-    background: #a9b8cf;
+
+  .icon-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--text-main);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--primary), var(--accent-purple));
+    border: none;
+    border-radius: 16px;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 40px rgba(99, 102, 241, 0.6);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
   }
-  .status-box {
-    margin-top: 24px;
-    padding: 16px;
-    border-radius: 8px;
-    background: #f2f5fa;
-    border: 1px solid #e0e6f0;
-    font-size: 14px;
+
+  /* Live YouTube Preview Card */
+  .yt-preview-card {
     display: none;
+    margin-top: 20px;
+    background: rgba(8, 14, 27, 0.6);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 16px;
+    padding: 14px;
+    gap: 16px;
+    align-items: center;
+    animation: fadeIn 0.4s ease;
   }
-  .status-box.visible { display: block; }
-  .status-box.error {
-    background: #fdf0f0;
-    border-color: #f2d5d5;
-    color: #9c3b3b;
+
+  .yt-preview-card.visible { display: flex; }
+
+  .yt-thumbnail {
+    width: 120px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
   }
-  .status-box.done {
-    background: #f0f9f2;
-    border-color: #d3ecd8;
+
+  .yt-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    overflow: hidden;
   }
-  .progress-line {
+
+  .yt-video-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent-teal);
+  }
+
+  .yt-title-placeholder {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Samples Row */
+  .samples-section {
+    margin-top: 18px;
     display: flex;
     align-items: center;
     gap: 10px;
+    flex-wrap: wrap;
   }
-  .spinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid #c9d5e8;
-    border-top-color: var(--accent);
+
+  .samples-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .sample-chip {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sample-chip:hover {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.4);
+    color: var(--text-main);
+  }
+
+  /* Multi-Step Pipeline Visualizer */
+  .pipeline-box {
+    display: none;
+    margin-top: 30px;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .pipeline-box.visible { display: flex; }
+
+  .pipeline-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+
+  .step-card {
+    background: rgba(8, 14, 27, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    opacity: 0.4;
+  }
+
+  .step-card.active {
+    opacity: 1;
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+  }
+
+  .step-card.completed {
+    opacity: 1;
+    border-color: var(--accent-teal);
+    background: rgba(20, 184, 166, 0.08);
+  }
+
+  .step-num {
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.1);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .download-link {
-    display: inline-block;
-    margin-top: 10px;
-    background: #2f9e52;
+
+  .step-card.active .step-num {
+    background: var(--primary);
+    color: white;
+  }
+
+  .step-card.completed .step-num {
+    background: var(--accent-teal);
+    color: white;
+  }
+
+  .step-title {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  /* Animated Progress Bar */
+  .progress-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--accent-purple), var(--accent-teal));
+    border-radius: 10px;
+    transition: width 0.4s ease;
+  }
+
+  .status-message {
+    font-size: 14px;
+    color: var(--text-muted);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  /* Result Box & Interactive Reader */
+  .result-container {
+    display: none;
+    margin-top: 30px;
+    flex-direction: column;
+    gap: 24px;
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .result-container.visible { display: flex; }
+
+  .success-banner {
+    background: rgba(20, 184, 166, 0.1);
+    border: 1px solid rgba(20, 184, 166, 0.3);
+    border-radius: 18px;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .success-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .success-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .success-subtitle {
+    font-size: 13px;
+    color: var(--accent-teal);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .download-btn {
+    background: linear-gradient(135deg, #10B981, #059669);
     color: white;
     text-decoration: none;
-    padding: 10px 16px;
-    border-radius: 8px;
+    padding: 12px 22px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    transition: all 0.2s ease;
+  }
+
+  .download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.6);
+  }
+
+  .secondary-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--text-main);
+    padding: 12px 18px;
+    border-radius: 12px;
     font-weight: 600;
     font-size: 14px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
   }
-  .examples {
-    margin-top: 18px;
+
+  .secondary-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  /* Interactive Inline Report Tabs & Reader */
+  .report-viewer {
+    background: rgba(8, 14, 27, 0.8);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .report-tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 12px;
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn.active {
+    background: rgba(99, 102, 241, 0.2);
+    color: #A5B4FC;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+  }
+
+  .tab-content {
+    display: none;
+    line-height: 1.6;
+    font-size: 14px;
+    color: var(--text-main);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .tab-content.active { display: block; }
+
+  /* Structured Content Styling */
+  .takeaway-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .takeaway-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-left: 3px solid var(--primary);
+    padding: 12px 16px;
+    border-radius: 0 10px 10px 0;
+  }
+
+  .section-block {
+    margin-bottom: 20px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    padding: 16px;
+  }
+
+  .section-head {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .timestamp-tag {
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
-    color: var(--muted);
+    color: var(--accent-teal);
+    background: rgba(20, 184, 166, 0.1);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+  }
+
+  .term-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .term-title {
+    font-weight: 700;
+    color: var(--accent-purple);
+    margin-bottom: 4px;
+  }
+
+  .qa-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .qa-q {
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+  }
+
+  .qa-a {
+    color: var(--text-muted);
+  }
+
+  /* History Grid */
+  .history-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+
+  .history-card {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: all 0.2s ease;
+  }
+
+  .history-card:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .history-title {
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--text-main);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .history-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* Error Box */
+  .error-box {
+    display: none;
+    background: rgba(244, 63, 94, 0.1);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    border-radius: 16px;
+    padding: 18px;
+    color: #FDA4AF;
+    font-size: 14px;
+    align-items: center;
+    gap: 12px;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .error-box.visible { display: flex; }
+
+  /* Toast Notification */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--primary);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 100;
+  }
+
+  .toast.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Keyframe Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    .hero-title { font-size: 30px; }
+    .pipeline-steps { grid-template-columns: repeat(2, 1fr); }
+    .glass-card { padding: 24px; }
+    .url-input { padding-right: 140px; }
   }
 </style>
 </head>
 <body>
-  <div class="card">
-    <h1>YouTube → PDF Summary</h1>
-    <p class="subtitle">Paste a YouTube video URL and get a structured PDF summary back.</p>
 
-    <form id="form">
-      <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=..." required />
-      <button type="submit" id="submitBtn">Generate</button>
-    </form>
+  <!-- Ambient Glowing Mesh Backdrop -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grid-pattern"></div>
 
-    <div class="examples">Works with youtube.com/watch, youtu.be, and /shorts links.</div>
+  <div class="app-container">
 
-    <div id="statusBox" class="status-box">
-      <div class="progress-line">
-        <div id="spinner" class="spinner"></div>
-        <span id="statusText">Queued</span>
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <span>YOUTUBE INTEL</span>
       </div>
-      <div id="resultArea"></div>
-    </div>
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        <span>AI Engine Ready</span>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero">
+      <div class="hero-pill">
+        <span>✦ Executive AI PDF Generator</span>
+      </div>
+      <h1 class="hero-title">Exhaustive Video Intelligence Reports</h1>
+      <p class="hero-subtitle">
+        Transform long YouTube talks and tutorials into publication-grade executive summaries, structured key concepts, glossaries, and downloadable PDF reports.
+      </p>
+    </header>
+
+    <!-- Main Card Form -->
+    <main class="glass-card">
+      <form id="summarizeForm" class="input-group">
+        <div class="input-wrapper">
+          <div class="input-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+          </div>
+          <input 
+            type="text" 
+            id="urlInput" 
+            class="url-input" 
+            placeholder="Paste YouTube Video URL (e.g., https://youtube.com/watch?v=...)" 
+            required 
+            autocomplete="off"
+          />
+          <div class="input-actions">
+            <button type="button" id="pasteBtn" class="icon-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+              Paste
+            </button>
+          </div>
+        </div>
+
+        <!-- Live YouTube Thumbnail Card -->
+        <div id="ytPreview" class="yt-preview-card">
+          <img id="ytThumbImg" class="yt-thumbnail" src="" alt="Thumbnail Preview" />
+          <div class="yt-info">
+            <span class="yt-video-id" id="ytVideoIdTag">ID: -</span>
+            <div class="yt-title-placeholder" id="ytPreviewTitle">Ready to process video transcript...</div>
+          </div>
+        </div>
+
+        <button type="submit" id="submitBtn" class="submit-btn">
+          <span>Generate Executive PDF Report</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+      </form>
+
+      <!-- Sample Videos Row -->
+      <div class="samples-section">
+        <span class="samples-label">Quick Samples:</span>
+        <button class="sample-chip" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Classic Music</button>
+        <button class="sample-chip" data-url="https://www.youtube.com/watch?v=jNQXAC9IVRw">First YouTube Video</button>
+        <button class="sample-chip" data-url="https://www.youtube.com/watch?v=L_LUpnjgPso">AI Tech Talk</button>
+      </div>
+
+      <!-- Error Message Box -->
+      <div id="errorBox" class="error-box">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <span id="errorText">An error occurred while processing.</span>
+      </div>
+
+      <!-- Pipeline Progress Stepper -->
+      <div id="pipelineBox" class="pipeline-box">
+        <div class="pipeline-steps">
+          <div class="step-card" id="step1">
+            <div class="step-num">1</div>
+            <span class="step-title">Transcript Fetch</span>
+          </div>
+          <div class="step-card" id="step2">
+            <div class="step-num">2</div>
+            <span class="step-title">AI Chunking</span>
+          </div>
+          <div class="step-card" id="step3">
+            <div class="step-num">3</div>
+            <span class="step-title">Deep Synthesis</span>
+          </div>
+          <div class="step-card" id="step4">
+            <div class="step-num">4</div>
+            <span class="step-title">PDF Rendering</span>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div id="progressFill" class="progress-fill"></div>
+        </div>
+
+        <div class="status-message">
+          <svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite;"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+          <span id="statusText">Initializing background task...</span>
+        </div>
+      </div>
+
+      <!-- Final Result Box & Interactive Reader -->
+      <div id="resultContainer" class="result-container">
+        <div class="success-banner">
+          <div class="success-info">
+            <div id="resultTitle" class="success-title">Executive Summary Generated</div>
+            <div id="resultMeta" class="success-subtitle">Publication-grade PDF is ready for instant download</div>
+          </div>
+          <div class="action-buttons">
+            <a id="downloadPdfBtn" href="#" class="download-btn" download>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              Download PDF Report
+            </a>
+            <button id="copyTakeawaysBtn" class="secondary-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copy Takeaways
+            </button>
+          </div>
+        </div>
+
+        <!-- Inline Interactive Report Reader -->
+        <div id="reportViewer" class="report-viewer">
+          <div class="report-tabs">
+            <button class="tab-btn active" data-tab="tabOverview">Overview</button>
+            <button class="tab-btn" data-tab="tabTakeaways">Key Takeaways</button>
+            <button class="tab-btn" data-tab="tabSections">Sections Breakdown</button>
+            <button class="tab-btn" data-tab="tabTerms">Glossary Terms</button>
+            <button class="tab-btn" data-tab="tabQA">Deep Dive Q&A</button>
+          </div>
+
+          <div id="tabOverview" class="tab-content active">
+            <p id="overviewText">Executive overview content will load here...</p>
+          </div>
+
+          <div id="tabTakeaways" class="tab-content">
+            <div id="takeawaysList" class="takeaway-list"></div>
+          </div>
+
+          <div id="tabSections" class="tab-content">
+            <div id="sectionsList"></div>
+          </div>
+
+          <div id="tabTerms" class="tab-content">
+            <div id="termsGrid" class="terms-grid"></div>
+          </div>
+
+          <div id="tabQA" class="tab-content">
+            <div id="qaList"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Recent History Grid -->
+    <section class="history-section">
+      <div class="section-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span>Recent Intelligence Reports</span>
+      </div>
+      <div id="historyGrid" class="history-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
   </div>
 
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Action completed successfully</div>
+
 <script>
-const form = document.getElementById('form');
-const urlInput = document.getElementById('url');
-const submitBtn = document.getElementById('submitBtn');
-const statusBox = document.getElementById('statusBox');
-const spinner = document.getElementById('spinner');
-const statusText = document.getElementById('statusText');
-const resultArea = document.getElementById('resultArea');
+  // DOM Elements
+  const summarizeForm = document.getElementById('summarizeForm');
+  const urlInput = document.getElementById('urlInput');
+  const pasteBtn = document.getElementById('pasteBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  const ytPreview = document.getElementById('ytPreview');
+  const ytThumbImg = document.getElementById('ytThumbImg');
+  const ytVideoIdTag = document.getElementById('ytVideoIdTag');
+  const ytPreviewTitle = document.getElementById('ytPreviewTitle');
 
-let pollTimer = null;
+  const errorBox = document.getElementById('errorBox');
+  const errorText = document.getElementById('errorText');
 
-function resetStatusBox() {
-  statusBox.className = 'status-box visible';
-  spinner.style.display = 'inline-block';
-  resultArea.innerHTML = '';
-}
+  const pipelineBox = document.getElementById('pipelineBox');
+  const progressFill = document.getElementById('progressFill');
+  const statusText = document.getElementById('statusText');
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const step3 = document.getElementById('step3');
+  const step4 = document.getElementById('step4');
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  if (pollTimer) clearInterval(pollTimer);
+  const resultContainer = document.getElementById('resultContainer');
+  const resultTitle = document.getElementById('resultTitle');
+  const resultMeta = document.getElementById('resultMeta');
+  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+  const copyTakeawaysBtn = document.getElementById('copyTakeawaysBtn');
 
-  submitBtn.disabled = true;
-  resetStatusBox();
-  statusText.textContent = 'Submitting...';
+  const historyGrid = document.getElementById('historyGrid');
+  const toast = document.getElementById('toast');
 
-  try {
-    const res = await fetch('/summarize', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ url: urlInput.value.trim() }),
-    });
+  let pollTimer = null;
+  let currentSummaryData = null;
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: res.statusText }));
-      throw new Error(err.detail || 'Request failed');
-    }
-
-    const data = await res.json();
-    pollStatus(data.job_id);
-  } catch (err) {
-    showError(err.message);
-    submitBtn.disabled = false;
+  // Extract YouTube ID
+  function getYouTubeId(url) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
   }
-});
 
-function pollStatus(jobId) {
-  pollTimer = setInterval(async () => {
+  // Update Live YouTube Preview
+  urlInput.addEventListener('input', () => {
+    const url = urlInput.value.trim();
+    const videoId = getYouTubeId(url);
+
+    if (videoId) {
+      ytThumbImg.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      ytVideoIdTag.textContent = `ID: ${videoId}`;
+      ytPreviewTitle.textContent = `YouTube Video Detected (${videoId})`;
+      ytPreview.classList.add('visible');
+    } else {
+      ytPreview.classList.remove('visible');
+    }
+  });
+
+  // Paste Button
+  pasteBtn.addEventListener('click', async () => {
     try {
-      const res = await fetch(`/status/${jobId}`);
-      if (!res.ok) throw new Error('Lost track of job');
-      const job = await res.json();
+      const text = await navigator.clipboard.readText();
+      urlInput.value = text;
+      urlInput.dispatchEvent(new Event('input'));
+      showToast('URL pasted from clipboard');
+    } catch (e) {
+      showToast('Clipboard access denied');
+    }
+  });
 
-      statusText.textContent = job.progress_message || job.status;
+  // Sample Chips
+  document.querySelectorAll('.sample-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      urlInput.value = chip.dataset.url;
+      urlInput.dispatchEvent(new Event('input'));
+    });
+  });
 
-      if (job.status === 'done') {
-        clearInterval(pollTimer);
-        spinner.style.display = 'none';
-        statusBox.classList.add('done');
-        resultArea.innerHTML = `<a class="download-link" href="/download/${jobId}" download>Download PDF</a>`;
-        submitBtn.disabled = false;
-      } else if (job.status === 'error') {
-        clearInterval(pollTimer);
-        showError(job.error || 'Something went wrong');
-        submitBtn.disabled = false;
+  // Submit Handler
+  summarizeForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = urlInput.value.trim();
+    if (!url) return;
+
+    if (pollTimer) clearInterval(pollTimer);
+    hideError();
+    resultContainer.classList.remove('visible');
+    pipelineBox.classList.add('visible');
+    submitBtn.disabled = true;
+
+    updatePipelineProgress('fetching_transcript', 'Connecting to YouTube API...');
+
+    try {
+      const res = await fetch('/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ detail: res.statusText }));
+        throw new Error(err.detail || 'Failed to initialize request');
       }
+
+      const data = await res.json();
+      pollStatus(data.job_id);
     } catch (err) {
-      clearInterval(pollTimer);
       showError(err.message);
+      pipelineBox.classList.remove('visible');
       submitBtn.disabled = false;
     }
-  }, 2000);
-}
+  });
 
-function showError(message) {
-  spinner.style.display = 'none';
-  statusBox.classList.add('error');
-  statusText.textContent = 'Error';
-  resultArea.innerHTML = `<div>${message}</div>`;
-}
+  // Poll Job Status
+  function pollStatus(jobId) {
+    pollTimer = setInterval(async () => {
+      try {
+        const res = await fetch(`/status/${jobId}`);
+        if (!res.ok) throw new Error('Lost connection to job server');
+        const job = await res.json();
+
+        updatePipelineProgress(job.status, job.progress_message);
+
+        if (job.status === 'done') {
+          clearInterval(pollTimer);
+          pipelineBox.classList.remove('visible');
+          submitBtn.disabled = false;
+          showResult(job);
+          saveToHistory(job);
+        } else if (job.status === 'error') {
+          clearInterval(pollTimer);
+          pipelineBox.classList.remove('visible');
+          submitBtn.disabled = false;
+          showError(job.error || 'Summarization process failed');
+        }
+      } catch (err) {
+        clearInterval(pollTimer);
+        pipelineBox.classList.remove('visible');
+        submitBtn.disabled = false;
+        showError(err.message);
+      }
+    }, 1500);
+  }
+
+  // Pipeline Stepper Progress Visualizer
+  function updatePipelineProgress(status, message) {
+    statusText.textContent = message || status;
+
+    // Reset steps
+    [step1, step2, step3, step4].forEach(s => s.className = 'step-card');
+
+    if (status === 'pending' || status === 'fetching_transcript') {
+      step1.classList.add('active');
+      progressFill.style.width = '20%';
+    } else if (status === 'chunking') {
+      step1.classList.add('completed');
+      step2.classList.add('active');
+      progressFill.style.width = '45%';
+    } else if (status === 'summarizing_chunks' || status === 'synthesizing') {
+      step1.classList.add('completed');
+      step2.classList.add('completed');
+      step3.classList.add('active');
+      progressFill.style.width = '75%';
+    } else if (status === 'generating_pdf') {
+      step1.classList.add('completed');
+      step2.classList.add('completed');
+      step3.classList.add('completed');
+      step4.classList.add('active');
+      progressFill.style.width = '90%';
+    } else if (status === 'done') {
+      [step1, step2, step3, step4].forEach(s => s.classList.add('completed'));
+      progressFill.style.width = '100%';
+    }
+  }
+
+  // Render Result & Interactive Viewer
+  function showResult(job) {
+    currentSummaryData = job.summary;
+    resultTitle.textContent = job.video_title || 'Executive Intelligence Report';
+    resultMeta.textContent = `PDF Ready • ${job.summary ? (job.summary.sections?.length || 0) : 0} Sections Analyzed`;
+    downloadPdfBtn.href = `/download/${job.job_id}`;
+    resultContainer.classList.add('visible');
+
+    if (job.summary) {
+      renderInlineSummary(job.summary);
+    }
+  }
+
+  // Render Inline Summary Tabs
+  function renderInlineSummary(s) {
+    // Overview
+    document.getElementById('overviewText').innerHTML = escapeHtml(s.overview || 'No overview provided.');
+
+    // Takeaways
+    const takeawaysList = document.getElementById('takeawaysList');
+    takeawaysList.innerHTML = (s.key_takeaways || []).map(t => 
+      `<div class="takeaway-card"><b>•</b> ${escapeHtml(t)}</div>`
+    ).join('');
+
+    // Sections
+    const sectionsList = document.getElementById('sectionsList');
+    sectionsList.innerHTML = (s.sections || []).map((sec, idx) => `
+      <div class="section-block">
+        <div class="section-head">
+          <span>${idx+1}. ${escapeHtml(sec.heading)}</span>
+          ${sec.timestamp ? `<span class="timestamp-tag">${escapeHtml(sec.timestamp)}</span>` : ''}
+        </div>
+        <ul style="padding-left: 20px; color: var(--text-muted);">
+          ${(sec.bullets || []).map(b => `<li style="margin-bottom: 4px;">${escapeHtml(b)}</li>`).join('')}
+        </ul>
+        ${sec.detail ? `<p style="margin-top: 8px; font-size: 13px; color: var(--text-dim);">${escapeHtml(sec.detail)}</p>` : ''}
+      </div>
+    `).join('');
+
+    // Terms
+    const termsGrid = document.getElementById('termsGrid');
+    termsGrid.innerHTML = (s.key_terms || []).map(kt => `
+      <div class="term-card">
+        <div class="term-title">${escapeHtml(kt.term)}</div>
+        <div style="font-size: 12px; color: var(--text-muted);">${escapeHtml(kt.definition)}</div>
+      </div>
+    `).join('');
+
+    // Q&A
+    const qaList = document.getElementById('qaList');
+    qaList.innerHTML = (s.deep_dive_qa || []).map((qa, i) => `
+      <div class="qa-card">
+        <div class="qa-q">Q${i+1}: ${escapeHtml(qa.question)}</div>
+        <div class="qa-a">A: ${escapeHtml(qa.answer)}</div>
+      </div>
+    `).join('');
+  }
+
+  // Tab Switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // Copy Takeaways to Clipboard
+  copyTakeawaysBtn.addEventListener('click', () => {
+    if (!currentSummaryData || !currentSummaryData.key_takeaways) return;
+    const text = `Key Takeaways:\n` + currentSummaryData.key_takeaways.map(t => `- ${t}`).join('\n');
+    navigator.clipboard.writeText(text);
+    showToast('Key Takeaways copied to clipboard!');
+  });
+
+  // History Store
+  function saveToHistory(job) {
+    let history = JSON.parse(localStorage.getItem('yt_pdf_history') || '[]');
+    history = history.filter(h => h.job_id !== job.job_id);
+    history.unshift({
+      job_id: job.job_id,
+      title: job.video_title || 'Untitled Video',
+      url: job.url,
+      date: new Date().toLocaleDateString()
+    });
+    localStorage.setItem('yt_pdf_history', JSON.stringify(history.slice(0, 8)));
+    loadHistory();
+  }
+
+  function loadHistory() {
+    const history = JSON.parse(localStorage.getItem('yt_pdf_history') || '[]');
+    if (history.length === 0) {
+      historyGrid.innerHTML = `<div style="font-size: 13px; color: var(--text-dim);">No previous reports generated yet.</div>`;
+      return;
+    }
+
+    historyGrid.innerHTML = history.map(item => {
+      const vId = getYouTubeId(item.url);
+      const thumb = vId ? `https://img.youtube.com/vi/${vId}/hqdefault.jpg` : '';
+      return `
+        <div class="history-card">
+          ${thumb ? `<img src="${thumb}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px;" />` : ''}
+          <div class="history-title">${escapeHtml(item.title)}</div>
+          <div class="history-meta">
+            <span>${item.date}</span>
+            <a href="/download/${item.job_id}" style="color: var(--primary); text-decoration: none; font-weight: 600;" download>PDF ➔</a>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Helpers
+  function showError(msg) {
+    errorText.textContent = msg;
+    errorBox.classList.add('visible');
+  }
+
+  function hideError() {
+    errorBox.classList.remove('visible');
+  }
+
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 3000);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  // Load history on start
+  loadHistory();
 </script>
 </body>
 </html>

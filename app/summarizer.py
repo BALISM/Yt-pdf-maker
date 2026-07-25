@@ -37,25 +37,26 @@ def get_client() -> genai.Client:
 # ---------------------------------------------------------------------------
 
 _SINGLE_CALL_PROMPT = """\
-You are turning a YouTube video transcript into a clear, well-organized \
-study document. You will be given the raw transcript text (auto-generated \
-captions, so expect minor typos, run-on sentences, and no punctuation in \
-places).
+You are an expert principal researcher and technical analyst. You are turning a YouTube video transcript into an exhaustive, highly structured, executive-grade intelligence report.
 
-Produce a structured summary of the video:
-- A short, descriptive title (don't just repeat "Video Summary").
-- A 2-4 sentence overview of what the video covers as a whole.
-- 3-7 key takeaways: the most important points a reader should remember, \
-most important first.
-- A set of sections that walk through the video's content in order. Each \
-section needs a short heading, a handful of concise bullet points \
-capturing the substance (not vague filler like "the speaker discusses \
-various topics"), and optionally 1-3 sentences of connective detail.
+Your goal is to extract MAXIMUM knowledge, granular detail, key takeaways, and actionable insights. Write for a reader who wants complete comprehension without watching the video. Avoid vague filler like "the speaker discusses topic X". Instead, state exact facts, names, numbers, steps, technologies, arguments, and conclusions.
 
-Write for someone who has NOT watched the video and wants to understand it \
-from this document alone. Be concrete: names, numbers, examples, and \
-conclusions from the transcript matter more than restating that "the \
-speaker talks about X".
+Produce a comprehensive structured summary containing:
+- title: A clear, highly descriptive title for the document.
+- tagline: A punchy 1-sentence executive subtitle summarizing the core message.
+- estimated_read_time: Estimated read time (e.g., "5 min read").
+- overview: A thorough 2-3 paragraph Executive Summary explaining the background context, primary problem/topic, key solutions or findings, and overall impact.
+- key_takeaways: 5-8 high-yield core takeaways. Each takeaway must be self-contained, highly informative, and packed with concrete facts.
+- sections: A sequential set of sections covering the content in depth. For each section:
+  - heading: Clear section title.
+  - timestamp: Approximate timestamp (MM:SS) where this topic begins.
+  - bullets: 3-8 comprehensive bullet points with specific facts, examples, steps, or explanations.
+  - detail: 2-4 sentences of deep connective prose expanding on the technical or contextual nuances.
+  - key_quote: (Optional) A memorable quote, golden nugget, or key verbatim statement from the speaker in this section.
+  - actionable_tips: 1-3 practical action items, recommendations, or key takeaways for this section.
+- key_terms: 4-8 important technical or domain-specific terms/concepts introduced in the video, with clear definitions.
+- deep_dive_qa: 3-6 comprehensive Question & Answer pairs addressing the core questions answered by the video.
+- conclusion: A 2-3 sentence final synthesis and summary recommendation.
 
 Video title (if known): {video_title}
 
@@ -80,7 +81,6 @@ def summarize_single(transcript_text: str, video_title: str | None = None) -> Vi
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=VideoSummary,
-            temperature=0.3,
         ),
     )
     return _parse_or_raise(response, VideoSummary)
@@ -96,13 +96,10 @@ This is one segment of a longer YouTube video transcript (segment \
 in the video). Auto-generated captions, so expect minor typos and no \
 punctuation in places.
 
-Summarize ONLY what is discussed in this segment:
-- A short heading describing what this part of the video covers.
-- 2-6 concise bullet points capturing the substance of this segment \
-(concrete points, not "the speaker continues talking").
-
-Do not try to summarize the whole video — you only have this one segment. \
-Do not invent a conclusion or wrap-up unless this segment actually contains one.
+Summarize ONLY what is discussed in this segment with high analytical detail:
+- heading: A short heading describing what this part of the video covers.
+- bullets: 3-8 concise but detailed bullet points capturing exact facts, numbers, methodologies, or arguments.
+- key_quote: (Optional) Any notable quote or key statement in this segment.
 
 Segment transcript:
 {chunk_text}
@@ -121,8 +118,6 @@ def summarize_chunk(chunk: TranscriptChunk, total_chunks: int) -> ChunkSummary:
         chunk_text=chunk.text,
     )
 
-    # Lightweight inline JSON schema for the map step: just heading + bullets.
-    # Timing is attached after parsing since the model doesn't need to invent it.
     response = client.models.generate_content(
         model=settings.gemini_model,
         contents=prompt,
@@ -133,10 +128,10 @@ def summarize_chunk(chunk: TranscriptChunk, total_chunks: int) -> ChunkSummary:
                 "properties": {
                     "heading": {"type": "string"},
                     "bullets": {"type": "array", "items": {"type": "string"}},
+                    "key_quote": {"type": "string"},
                 },
                 "required": ["heading", "bullets"],
             },
-            temperature=0.3,
         ),
     )
     data = _parse_json_or_raise(response)
@@ -146,6 +141,7 @@ def summarize_chunk(chunk: TranscriptChunk, total_chunks: int) -> ChunkSummary:
         end_time=chunk.end_time,
         heading=data.get("heading", f"Segment {chunk.index + 1}"),
         bullets=data.get("bullets", []),
+        key_quote=data.get("key_quote"),
     )
 
 
@@ -154,29 +150,22 @@ def summarize_chunk(chunk: TranscriptChunk, total_chunks: int) -> ChunkSummary:
 # ---------------------------------------------------------------------------
 
 _SYNTHESIS_PROMPT = """\
-You are given a list of section summaries that were produced independently \
-from consecutive segments of ONE YouTube video, in chronological order. \
-Because each one was written without seeing the others, there may be:
-- Points repeated across multiple segments (merge and deduplicate them).
-- References that only make sense with context from an earlier segment \
-(resolve them using that earlier context instead of leaving them vague).
-- Uneven granularity between segments (even them out).
+You are given section summaries produced from consecutive segments of ONE YouTube video, in chronological order.
 
-Your job is to synthesize these into ONE coherent structured document for \
-the whole video:
-- A short, descriptive overall title.
-- A 2-4 sentence overview of the whole video.
-- 3-7 key takeaways for the whole video, most important first, with no \
-duplicates.
-- A final set of sections. You do not need a 1:1 mapping to the input \
-segments — merge segments that cover the same topic, split a segment if it \
-clearly covers two unrelated things, and keep the original approximate \
-timestamp (MM:SS) for each resulting section so a reader can still jump to \
-that part of the video.
+Your task is to synthesize all segment summaries into ONE master executive intelligence document:
+- title: Descriptive title.
+- tagline: 1-sentence punchy subtitle.
+- estimated_read_time: Estimated read time.
+- overview: 2-3 paragraph Executive Summary explaining context, problem, solution, and implications.
+- key_takeaways: 5-8 top core takeaways (no duplicates, high density).
+- sections: Logically merged sections with headings, timestamps (MM:SS), comprehensive bullets, explanatory detail paragraphs, key quotes, and actionable tips.
+- key_terms: 4-8 key technical terms/concepts with definitions.
+- deep_dive_qa: 3-6 comprehensive Q&A pairs covering fundamental questions answered by the video.
+- conclusion: Final synthesis and summary recommendation.
 
 Video title (if known): {video_title}
 
-Segment summaries, in chronological order (JSON):
+Segment summaries (JSON):
 {chunk_summaries_json}
 """
 
@@ -211,7 +200,6 @@ def synthesize_summaries(
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=VideoSummary,
-            temperature=0.3,
         ),
     )
     return _parse_or_raise(response, VideoSummary)

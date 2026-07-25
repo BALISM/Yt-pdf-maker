@@ -107,10 +107,10 @@ def run_pipeline(job_id: str) -> None:
             _update(job, status=JobStatus.SUMMARIZING_CHUNKS, progress_message="Summarizing transcript...")
             summary = summarize_single(full_text, video_title=job.video_title)
 
-        _update(job, video_title=summary.title)
+        _update(job, video_title=summary.title, summary=summary)
 
         # --- Phase 5: render PDF -------------------------------------------
-        _update(job, status=JobStatus.GENERATING_PDF, progress_message="Rendering PDF...")
+        _update(job, status=JobStatus.GENERATING_PDF, progress_message="Rendering PDF report...")
         pdf_filename = f"{job.job_id}.pdf"
         pdf_path = settings.output_path / pdf_filename
         generate_pdf(summary, pdf_path, source_url=job.url)
@@ -120,6 +120,7 @@ def run_pipeline(job_id: str) -> None:
             status=JobStatus.DONE,
             progress_message="Done",
             pdf_filename=pdf_filename,
+            summary=summary,
         )
         logger.info("Job %s completed successfully -> %s", job.job_id, pdf_filename)
 
