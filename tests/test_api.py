@@ -65,7 +65,7 @@ def test_full_pipeline_with_mocked_transcript_and_llm(monkeypatch):
 
     monkeypatch.setattr("app.jobs.get_transcript", lambda url: fake_transcript)
     monkeypatch.setattr("app.jobs.needs_chunking", lambda text: False)
-    monkeypatch.setattr("app.jobs.summarize_single", lambda text, video_title=None: fake_summary)
+    monkeypatch.setattr("app.jobs.summarize_single", lambda *args, **kwargs: fake_summary)
 
     res = client.post("/summarize", json={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"})
     assert res.status_code == 200

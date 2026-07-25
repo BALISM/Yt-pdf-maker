@@ -42,10 +42,10 @@ logger = logging.getLogger(__name__)
 _JOBS: Dict[str, JobRecord] = {}
 
 
-def create_job(url: str) -> JobRecord:
+def create_job(url: str, category: str = "auto") -> JobRecord:
     job_id = uuid.uuid4().hex[:12]
     now = time.time()
-    job = JobRecord(job_id=job_id, url=url, created_at=now, updated_at=now)
+    job = JobRecord(job_id=job_id, url=url, category=category, created_at=now, updated_at=now)
     _JOBS[job_id] = job
     return job
 
@@ -99,13 +99,13 @@ def run_pipeline(job_id: str) -> None:
                 _update(job, progress_message=f"Summarizing chunk {done}/{total}...")
 
             summary = summarize_long_transcript(
-                chunks, video_title=job.video_title, on_chunk_done=on_chunk_done
+                chunks, video_title=job.video_title, category=job.category, on_chunk_done=on_chunk_done
             )
             _update(job, status=JobStatus.SYNTHESIZING, progress_message="Synthesizing final document...")
         else:
             # --- Phase 2: single-call summarization ---------------------
             _update(job, status=JobStatus.SUMMARIZING_CHUNKS, progress_message="Summarizing transcript...")
-            summary = summarize_single(full_text, video_title=job.video_title)
+            summary = summarize_single(full_text, video_title=job.video_title, category=job.category)
 
         _update(job, video_title=summary.title, summary=summary)
 

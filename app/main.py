@@ -100,7 +100,7 @@ def summarize(payload: SummarizeRequest, background_tasks: BackgroundTasks) -> S
     except InvalidYouTubeURL as e:
         raise HTTPException(status_code=400, detail=f"Invalid YouTube URL: {e}") from e
 
-    job = create_job(payload.url)
+    job = create_job(payload.url, category=payload.category or "auto")
     background_tasks.add_task(run_pipeline, job.job_id)
     return SummarizeResponse(job_id=job.job_id, status=job.status)
 

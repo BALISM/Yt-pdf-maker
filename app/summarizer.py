@@ -32,14 +32,64 @@ def get_client() -> genai.Client:
     return _client
 
 
+CATEGORY_INSTRUCTIONS = {
+    "lecture": """
+SPECIAL CATEGORY FOCUS — ACADEMIC LECTURE & STUDY NOTES:
+Format and structure this document specifically as comprehensive academic lecture notes:
+- Emphasize core definitions, formulas, theories, main equations, and lecture topics.
+- Break sections down like textbook chapters with clear conceptual headings.
+- Include a "Student Self-Study Quiz / Exam Review Q&A" section in deep_dive_qa.
+- Format key_takeaways as core study concepts to memorize.
+""",
+    "sports": """
+SPECIAL CATEGORY FOCUS — SPORTS MATCH RECAP & HIGHLIGHTS:
+Format and structure this report specifically as a high-energy sports match breakdown:
+- Highlight key match moments, score timelines, play-by-play turning points, and standout player performances.
+- Focus on tactical maneuvers, key statistics, and game strategy.
+- Structure key_takeaways as the major game-changing plays and match outcomes.
+""",
+    "movie": """
+SPECIAL CATEGORY FOCUS — FILM REVIEW & NARRATIVE PLOT DIGEST:
+Format and structure this report specifically as a cinematic film review & plot digest:
+- Provide a logline overview, character arc breakdowns, narrative plot beats, and cinematic themes.
+- Highlight iconic quotes and memorable dialogue.
+- Include film verdict / critical takeaway in the conclusion.
+""",
+    "tutorial": """
+SPECIAL CATEGORY FOCUS — TECHNICAL TUTORIAL & CODING GUIDE:
+Format and structure this report specifically as a step-by-step developer tutorial:
+- Focus on setup prerequisites, step-by-step commands/code snippets, system architecture, and code logic.
+- Include common troubleshooting tips, edge cases, and best practices in key_terms and actionable_tips.
+""",
+    "business": """
+SPECIAL CATEGORY FOCUS — EXECUTIVE BUSINESS BRIEF & MARKET ANALYSIS:
+Format and structure this report specifically as an executive board-level brief:
+- Focus on key business metrics, financial figures, market trends, strategic ROI, and competitive positioning.
+- Structure actionable_tips as strategic executive recommendations.
+""",
+    "podcast": """
+SPECIAL CATEGORY FOCUS — PODCAST & INTERVIEW HIGHLIGHTS:
+Format and structure this report specifically as a podcast episode digest:
+- Focus on key guest insights, notable verbatim quotes, core debates, and timestamped topic shifts.
+- Structure Q&A around the central questions posed to the guest.
+""",
+    "auto": """
+AUTOMATIC ADAPTIVE MODE:
+Analyze the transcript content and adapt the terminology, structure, and focus to best fit the domain (academic lecture, sports, film, coding tutorial, business, or interview).
+"""
+}
+
+
 # ---------------------------------------------------------------------------
 # Phase 2 — single-call summarization (short videos)
 # ---------------------------------------------------------------------------
 
 _SINGLE_CALL_PROMPT = """\
-You are an expert principal researcher and technical analyst. You are turning a YouTube video transcript into an exhaustive, highly structured, executive-grade intelligence report.
+You are an expert principal researcher and technical analyst. You are turning a YouTube video transcript into an exhaustive, highly structured intelligence report.
 
 Your goal is to extract MAXIMUM knowledge, granular detail, key takeaways, and actionable insights. Write for a reader who wants complete comprehension without watching the video. Avoid vague filler like "the speaker discusses topic X". Instead, state exact facts, names, numbers, steps, technologies, arguments, and conclusions.
+
+{category_instruction}
 
 Produce a comprehensive structured summary containing:
 - title: A clear, highly descriptive title for the document.
@@ -65,13 +115,18 @@ Transcript:
 """
 
 
-def summarize_single(transcript_text: str, video_title: str | None = None) -> VideoSummary:
-    """Phase 2: send the whole transcript in one call. Only safe for videos
-    short enough that the transcript comfortably fits in a single request —
-    see chunking.needs_chunking() for the decision."""
+def summarize_single(
+    transcript_text: str,
+    video_title: str | None = None,
+    category: str = "auto",
+    **kwargs,
+) -> VideoSummary:
+    """Phase 2: send the whole transcript in one call."""
     client = get_client()
+    cat_instr = CATEGORY_INSTRUCTIONS.get(category.lower(), CATEGORY_INSTRUCTIONS["auto"])
     prompt = _SINGLE_CALL_PROMPT.format(
         video_title=video_title or "(unknown)",
+        category_instruction=cat_instr,
         transcript=transcript_text,
     )
 
@@ -83,7 +138,9 @@ def summarize_single(transcript_text: str, video_title: str | None = None) -> Vi
             response_schema=VideoSummary,
         ),
     )
-    return _parse_or_raise(response, VideoSummary)
+    summary = _parse_or_raise(response, VideoSummary)
+    summary.category = category
+    return summary
 
 
 # ---------------------------------------------------------------------------
@@ -153,6 +210,9 @@ _SYNTHESIS_PROMPT = """\
 You are given section summaries produced from consecutive segments of ONE YouTube video, in chronological order.
 
 Your task is to synthesize all segment summaries into ONE master executive intelligence document:
+
+{category_instruction}
+
 - title: Descriptive title.
 - tagline: 1-sentence punchy subtitle.
 - estimated_read_time: Estimated read time.
@@ -173,6 +233,7 @@ Segment summaries (JSON):
 def synthesize_summaries(
     chunk_summaries: list[ChunkSummary],
     video_title: str | None = None,
+    category: str = "auto",
 ) -> VideoSummary:
     from app.chunking import format_timestamp
 
@@ -189,8 +250,10 @@ def synthesize_summaries(
         for cs in chunk_summaries
     ]
 
+    cat_instr = CATEGORY_INSTRUCTIONS.get(category.lower(), CATEGORY_INSTRUCTIONS["auto"])
     prompt = _SYNTHESIS_PROMPT.format(
         video_title=video_title or "(unknown)",
+        category_instruction=cat_instr,
         chunk_summaries_json=json.dumps(serializable, indent=2, ensure_ascii=False),
     )
 
@@ -202,12 +265,15 @@ def synthesize_summaries(
             response_schema=VideoSummary,
         ),
     )
-    return _parse_or_raise(response, VideoSummary)
+    summary = _parse_or_raise(response, VideoSummary)
+    summary.category = category
+    return summary
 
 
 def summarize_long_transcript(
     chunks: list[TranscriptChunk],
     video_title: str | None = None,
+    category: str = "auto",
     on_chunk_done=None,
 ) -> VideoSummary:
     """Full Phase 4 pipeline: map over chunks, then reduce."""
@@ -217,7 +283,7 @@ def summarize_long_transcript(
         chunk_summaries.append(cs)
         if on_chunk_done:
             on_chunk_done(len(chunk_summaries), len(chunks))
-    return synthesize_summaries(chunk_summaries, video_title=video_title)
+    return synthesize_summaries(chunk_summaries, video_title=video_title, category=category)
 
 
 # ---------------------------------------------------------------------------

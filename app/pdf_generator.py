@@ -296,6 +296,17 @@ def _escape(text: str) -> str:
     )
 
 
+CATEGORY_BADGES = {
+    "lecture": "🎓 ACADEMIC LECTURE STUDY NOTES",
+    "sports": "⚽ SPORTS MATCH RECAP & HIGHLIGHTS",
+    "movie": "🎬 FILM REVIEW & PLOT DIGEST",
+    "tutorial": "💻 TECHNICAL TUTORIAL & CODING GUIDE",
+    "business": "📊 EXECUTIVE BUSINESS BRIEF",
+    "podcast": "🎙️ PODCAST & INTERVIEW HIGHLIGHTS",
+    "auto": "✦ AI VIDEO INTELLIGENCE DIGEST",
+}
+
+
 def generate_pdf(
     summary: VideoSummary,
     output_path: Path | str,
@@ -308,6 +319,19 @@ def generate_pdf(
     story = []
 
     include_toc = len(summary.sections) >= TOC_MIN_SECTIONS
+
+    # --- Category Pill Badge ----------------------------------------------
+    cat_key = (summary.category or "auto").lower()
+    badge_label = CATEGORY_BADGES.get(cat_key, CATEGORY_BADGES["auto"])
+    badge_style = ParagraphStyle(
+        "CategoryBadge",
+        parent=styles["Normal"],
+        fontName="Helvetica-Bold",
+        fontSize=8.5,
+        textColor=ACCENT_COLOR,
+        spaceAfter=6,
+    )
+    story.append(Paragraph(badge_label, badge_style))
 
     # --- Document Header Box / Title --------------------------------------
     story.append(Paragraph(_escape(summary.title), styles["DocTitle"]))

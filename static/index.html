@@ -3,28 +3,29 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>YouTube Knowledge Engine — AI Executive PDF Generator</title>
+<title>YouTube Knowledge Engine — AI Persona PDF Generator</title>
 
-<!-- Modern Google Fonts -->
+<!-- Google Fonts -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
 <style>
   :root {
-    --bg-dark: #070B14;
-    --card-bg: rgba(15, 23, 42, 0.7);
+    --bg-dark: #050811;
+    --card-bg: rgba(13, 20, 38, 0.75);
     --card-border: rgba(255, 255, 255, 0.08);
-    --card-border-glow: rgba(99, 102, 241, 0.3);
     --primary: #6366F1;
-    --primary-hover: #4F46E5;
+    --primary-glow: rgba(99, 102, 241, 0.4);
     --accent-teal: #14B8A6;
     --accent-purple: #A855F7;
+    --accent-amber: #F59E0B;
     --accent-rose: #F43F5E;
+    --accent-cyan: #06B6D4;
     --text-main: #F8FAFC;
     --text-muted: #94A3B8;
     --text-dim: #64748B;
-    --glass-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    --glass-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,58 +40,16 @@
     align-items: center;
     position: relative;
     overflow-x: hidden;
-    padding-bottom: 60px;
+    padding-bottom: 80px;
   }
 
-  /* Animated Ambient Mesh Background Orbs */
-  .orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(120px);
-    opacity: 0.45;
-    pointer-events: none;
-    z-index: 0;
-    animation: floatOrb 20s infinite ease-in-out alternate;
-  }
-
-  .orb-1 {
-    top: -100px;
-    left: 10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, #6366F1 0%, rgba(99, 102, 241, 0) 70%);
-  }
-
-  .orb-2 {
-    top: 250px;
-    right: 5%;
-    width: 550px;
-    height: 550px;
-    background: radial-gradient(circle, #A855F7 0%, rgba(168, 85, 247, 0) 70%);
-    animation-delay: -7s;
-  }
-
-  .orb-3 {
-    bottom: 50px;
-    left: 20%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, #0D9488 0%, rgba(13, 148, 136, 0) 70%);
-    animation-delay: -14s;
-  }
-
-  @keyframes floatOrb {
-    0% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(40px, -30px) scale(1.1); }
-    100% { transform: translate(-30px, 40px) scale(0.95); }
-  }
-
-  /* Grid Overlay Pattern */
-  .grid-pattern {
+  /* HTML5 Interactive Constellation Canvas */
+  #bgCanvas {
     position: fixed;
-    top: 0; left: 0; width: 100vw; height: 100vh;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 32px 32px;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     pointer-events: none;
     z-index: 0;
   }
@@ -100,43 +59,45 @@
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 900px;
+    max-width: 960px;
     padding: 30px 20px;
     display: flex;
     flex-direction: column;
-    gap: 32px;
+    gap: 36px;
   }
 
-  /* Navigation Header */
+  /* Navbar */
   .navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 24px;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(16px);
+    padding: 16px 28px;
+    background: rgba(13, 20, 38, 0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--card-border);
-    border-radius: 16px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   }
 
   .brand {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     font-weight: 800;
-    font-size: 18px;
+    font-size: 19px;
     letter-spacing: -0.5px;
   }
 
   .brand-icon {
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
     background: linear-gradient(135deg, var(--primary), var(--accent-purple));
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 4px 20px var(--primary-glow);
   }
 
   .status-badge {
@@ -144,12 +105,12 @@
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--accent-teal);
-    background: rgba(20, 184, 166, 0.1);
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(20, 184, 166, 0.2);
+    background: rgba(20, 184, 166, 0.12);
+    padding: 6px 16px;
+    border-radius: 30px;
+    border: 1px solid rgba(20, 184, 166, 0.3);
   }
 
   .status-dot {
@@ -157,13 +118,13 @@
     height: 8px;
     background-color: var(--accent-teal);
     border-radius: 50%;
-    box-shadow: 0 0 10px var(--accent-teal);
+    box-shadow: 0 0 12px var(--accent-teal);
     animation: pulse 2s infinite;
   }
 
   @keyframes pulse {
     0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.6; }
+    50% { transform: scale(1.4); opacity: 0.5; }
   }
 
   /* Hero Section */
@@ -172,7 +133,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     margin-top: 10px;
   }
 
@@ -181,22 +142,23 @@
     align-items: center;
     gap: 8px;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #A5B4FC;
-    background: rgba(99, 102, 241, 0.12);
-    border: 1px solid rgba(99, 102, 241, 0.3);
-    padding: 6px 16px;
+    letter-spacing: 1.2px;
+    color: #C7D2FE;
+    background: linear-gradient(90deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+    border: 1px solid rgba(99, 102, 241, 0.4);
+    padding: 8px 20px;
     border-radius: 30px;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
   }
 
   .hero-title {
-    font-size: 42px;
-    font-weight: 800;
-    line-height: 1.15;
-    letter-spacing: -1px;
-    background: linear-gradient(135deg, #FFFFFF 30%, #C7D2FE 70%, #A855F7 100%);
+    font-size: 46px;
+    font-weight: 900;
+    line-height: 1.12;
+    letter-spacing: -1.2px;
+    background: linear-gradient(135deg, #FFFFFF 20%, #C7D2FE 60%, #A855F7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -204,32 +166,33 @@
   .hero-subtitle {
     font-size: 16px;
     color: var(--text-muted);
-    max-width: 640px;
+    max-width: 680px;
     line-height: 1.6;
     font-weight: 400;
   }
 
-  /* Main Glass Card */
+  /* Glassmorphic Main Card */
   .glass-card {
     background: var(--card-bg);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
     border: 1px solid var(--card-border);
-    border-radius: 24px;
-    padding: 36px;
+    border-radius: 28px;
+    padding: 40px;
     box-shadow: var(--glass-shadow);
-    transition: border-color 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .glass-card:hover {
-    border-color: rgba(99, 102, 241, 0.25);
+    border-color: rgba(99, 102, 241, 0.3);
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.7), 0 0 40px rgba(99, 102, 241, 0.15);
   }
 
-  /* Input Form */
-  .input-group {
+  /* Form & Inputs */
+  .form-section {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 28px;
   }
 
   .input-wrapper {
@@ -240,7 +203,7 @@
 
   .input-icon {
     position: absolute;
-    left: 18px;
+    left: 20px;
     color: #818CF8;
     pointer-events: none;
     display: flex;
@@ -249,10 +212,10 @@
 
   .url-input {
     width: 100%;
-    padding: 18px 140px 18px 52px;
-    background: rgba(8, 14, 27, 0.7);
+    padding: 20px 140px 20px 56px;
+    background: rgba(6, 10, 20, 0.75);
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 16px;
+    border-radius: 18px;
     font-size: 15px;
     font-family: inherit;
     color: var(--text-main);
@@ -262,25 +225,25 @@
 
   .url-input:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 25px rgba(99, 102, 241, 0.3);
-    background: rgba(15, 23, 42, 0.9);
+    box-shadow: 0 0 30px var(--primary-glow);
+    background: rgba(13, 20, 38, 0.95);
   }
 
   .input-actions {
     position: absolute;
-    right: 10px;
+    right: 12px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
 
   .icon-btn {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     color: var(--text-muted);
-    border-radius: 10px;
-    padding: 8px 12px;
-    font-size: 12px;
+    border-radius: 12px;
+    padding: 9px 14px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -290,50 +253,129 @@
   }
 
   .icon-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.15);
     color: var(--text-main);
   }
 
+  /* Mode Category Selector Grid */
+  .category-section {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .category-label {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+  }
+
+  .cat-card {
+    background: rgba(6, 10, 20, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    user-select: none;
+  }
+
+  .cat-card:hover {
+    background: rgba(99, 102, 241, 0.08);
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+  }
+
+  .cat-card.selected {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(168, 85, 247, 0.15));
+    border-color: var(--primary);
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.3);
+  }
+
+  .cat-icon {
+    font-size: 24px;
+    line-height: 1;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .cat-card.selected .cat-icon {
+    background: var(--primary);
+    color: white;
+  }
+
+  .cat-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .cat-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+
+  .cat-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.3;
+  }
+
+  /* Submit Button */
   .submit-btn {
     width: 100%;
-    padding: 18px;
+    padding: 20px;
     background: linear-gradient(135deg, var(--primary), var(--accent-purple));
     border: none;
-    border-radius: 16px;
+    border-radius: 18px;
     color: #FFFFFF;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    box-shadow: 0 10px 30px rgba(99, 102, 241, 0.4);
+    gap: 12px;
+    box-shadow: 0 12px 35px rgba(99, 102, 241, 0.45);
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
   }
 
   .submit-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 14px 40px rgba(99, 102, 241, 0.6);
+    box-shadow: 0 16px 45px rgba(99, 102, 241, 0.65);
   }
 
   .submit-btn:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    transform: none;
   }
 
-  /* Live YouTube Preview Card */
+  /* YouTube Live Thumbnail Preview */
   .yt-preview-card {
     display: none;
-    margin-top: 20px;
-    background: rgba(8, 14, 27, 0.6);
-    border: 1px solid rgba(99, 102, 241, 0.25);
-    border-radius: 16px;
-    padding: 14px;
-    gap: 16px;
+    background: rgba(6, 10, 20, 0.7);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 18px;
+    padding: 16px;
+    gap: 18px;
     align-items: center;
     animation: fadeIn 0.4s ease;
   }
@@ -341,76 +383,42 @@
   .yt-preview-card.visible { display: flex; }
 
   .yt-thumbnail {
-    width: 120px;
-    height: 68px;
+    width: 130px;
+    height: 74px;
     object-fit: cover;
-    border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.6);
   }
 
   .yt-info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     flex: 1;
     overflow: hidden;
   }
 
-  .yt-video-id {
+  .yt-badge {
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     color: var(--accent-teal);
   }
 
-  .yt-title-placeholder {
+  .yt-title-text {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-main);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  /* Samples Row */
-  .samples-section {
-    margin-top: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .samples-label {
-    font-size: 12px;
-    color: var(--text-dim);
-    font-weight: 600;
-    text-transform: uppercase;
-  }
-
-  .sample-chip {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--text-muted);
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .sample-chip:hover {
-    background: rgba(99, 102, 241, 0.15);
-    border-color: rgba(99, 102, 241, 0.4);
-    color: var(--text-main);
-  }
-
-  /* Multi-Step Pipeline Visualizer */
+  /* Progress Stepper */
   .pipeline-box {
     display: none;
-    margin-top: 30px;
+    margin-top: 32px;
     flex-direction: column;
-    gap: 20px;
+    gap: 22px;
     animation: fadeIn 0.4s ease;
   }
 
@@ -423,68 +431,55 @@
   }
 
   .step-card {
-    background: rgba(8, 14, 27, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
-    padding: 14px 10px;
+    background: rgba(6, 10, 20, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 16px 12px;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease;
     opacity: 0.4;
+    transition: all 0.3s ease;
   }
 
   .step-card.active {
     opacity: 1;
     border-color: var(--primary);
-    background: rgba(99, 102, 241, 0.1);
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+    background: rgba(99, 102, 241, 0.12);
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.25);
   }
 
   .step-card.completed {
     opacity: 1;
     border-color: var(--accent-teal);
-    background: rgba(20, 184, 166, 0.08);
+    background: rgba(20, 184, 166, 0.1);
   }
 
   .step-num {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 12px;
+    font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  .step-card.active .step-num {
-    background: var(--primary);
-    color: white;
-  }
+  .step-card.active .step-num { background: var(--primary); color: white; }
+  .step-card.completed .step-num { background: var(--accent-teal); color: white; }
 
-  .step-card.completed .step-num {
-    background: var(--accent-teal);
-    color: white;
-  }
+  .step-title { font-size: 12px; font-weight: 700; }
 
-  .step-title {
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.3;
-  }
-
-  /* Animated Progress Bar */
   .progress-track {
     width: 100%;
-    height: 6px;
+    height: 8px;
     background: rgba(255, 255, 255, 0.08);
     border-radius: 10px;
     overflow: hidden;
-    position: relative;
   }
 
   .progress-fill {
@@ -503,12 +498,13 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    font-weight: 500;
   }
 
-  /* Result Box & Interactive Reader */
+  /* Result Box */
   .result-container {
     display: none;
-    margin-top: 30px;
+    margin-top: 32px;
     flex-direction: column;
     gap: 24px;
     animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
@@ -517,10 +513,10 @@
   .result-container.visible { display: flex; }
 
   .success-banner {
-    background: rgba(20, 184, 166, 0.1);
-    border: 1px solid rgba(20, 184, 166, 0.3);
-    border-radius: 18px;
-    padding: 20px;
+    background: rgba(20, 184, 166, 0.12);
+    border: 1px solid rgba(20, 184, 166, 0.35);
+    border-radius: 20px;
+    padding: 22px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -528,56 +524,38 @@
     gap: 16px;
   }
 
-  .success-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+  .success-title { font-size: 19px; font-weight: 800; color: var(--text-main); }
+  .success-subtitle { font-size: 13px; color: var(--accent-teal); font-weight: 600; }
 
-  .success-title {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-main);
-  }
-
-  .success-subtitle {
-    font-size: 13px;
-    color: var(--accent-teal);
-  }
-
-  .action-buttons {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
+  .action-buttons { display: flex; gap: 12px; flex-wrap: wrap; }
 
   .download-btn {
     background: linear-gradient(135deg, #10B981, #059669);
     color: white;
     text-decoration: none;
-    padding: 12px 22px;
-    border-radius: 12px;
-    font-weight: 700;
-    font-size: 14px;
+    padding: 14px 26px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 15px;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-    transition: all 0.2s ease;
+    gap: 10px;
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.45);
+    transition: all 0.25s ease;
   }
 
   .download-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.6);
+    box-shadow: 0 12px 30px rgba(16, 185, 129, 0.65);
   }
 
   .secondary-btn {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: var(--text-main);
-    padding: 12px 18px;
-    border-radius: 12px;
-    font-weight: 600;
+    padding: 14px 20px;
+    border-radius: 14px;
+    font-weight: 700;
     font-size: 14px;
     cursor: pointer;
     display: inline-flex;
@@ -586,26 +564,24 @@
     transition: all 0.2s ease;
   }
 
-  .secondary-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
+  .secondary-btn:hover { background: rgba(255, 255, 255, 0.16); }
 
-  /* Interactive Inline Report Tabs & Reader */
+  /* Interactive Tabbed Report Viewer */
   .report-viewer {
-    background: rgba(8, 14, 27, 0.8);
+    background: rgba(6, 10, 20, 0.85);
     border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 24px;
+    border-radius: 22px;
+    padding: 26px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 22px;
   }
 
   .report-tabs {
     display: flex;
     gap: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    padding-bottom: 12px;
+    padding-bottom: 14px;
     overflow-x: auto;
   }
 
@@ -613,58 +589,45 @@
     background: transparent;
     border: none;
     color: var(--text-muted);
-    padding: 8px 16px;
-    border-radius: 8px;
+    padding: 10px 18px;
+    border-radius: 10px;
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
     transition: all 0.2s ease;
   }
 
   .tab-btn.active {
-    background: rgba(99, 102, 241, 0.2);
+    background: rgba(99, 102, 241, 0.22);
     color: #A5B4FC;
-    border: 1px solid rgba(99, 102, 241, 0.3);
+    border: 1px solid rgba(99, 102, 241, 0.4);
   }
 
-  .tab-content {
-    display: none;
-    line-height: 1.6;
-    font-size: 14px;
-    color: var(--text-main);
-    animation: fadeIn 0.3s ease;
-  }
-
+  .tab-content { display: none; line-height: 1.65; font-size: 14px; color: var(--text-main); animation: fadeIn 0.3s ease; }
   .tab-content.active { display: block; }
 
-  /* Structured Content Styling */
-  .takeaway-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
+  .takeaway-list { display: flex; flex-direction: column; gap: 12px; }
   .takeaway-card {
     background: rgba(255, 255, 255, 0.03);
-    border-left: 3px solid var(--primary);
-    padding: 12px 16px;
-    border-radius: 0 10px 10px 0;
+    border-left: 4px solid var(--primary);
+    padding: 14px 18px;
+    border-radius: 0 12px 12px 0;
   }
 
   .section-block {
-    margin-bottom: 20px;
+    margin-bottom: 22px;
     background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 14px;
-    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 18px;
   }
 
   .section-head {
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
     color: var(--primary);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     display: flex;
     justify-content: space-between;
   }
@@ -673,89 +636,67 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     color: var(--accent-teal);
-    background: rgba(20, 184, 166, 0.1);
-    padding: 2px 8px;
-    border-radius: 6px;
+    background: rgba(20, 184, 166, 0.12);
+    padding: 3px 10px;
+    border-radius: 8px;
   }
 
   .terms-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
   }
 
   .term-card {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 12px;
-    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 16px;
   }
 
-  .term-title {
-    font-weight: 700;
-    color: var(--accent-purple);
-    margin-bottom: 4px;
-  }
+  .term-title { font-weight: 800; color: var(--accent-purple); margin-bottom: 6px; }
 
   .qa-card {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
   }
 
-  .qa-q {
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 6px;
-  }
-
-  .qa-a {
-    color: var(--text-muted);
-  }
+  .qa-q { font-weight: 800; color: var(--text-main); margin-bottom: 8px; }
+  .qa-a { color: var(--text-muted); }
 
   /* History Grid */
-  .history-section {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .section-title {
-    font-size: 18px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .history-section { display: flex; flex-direction: column; gap: 18px; }
+  .section-title { font-size: 19px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
 
   .history-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 16px;
   }
 
   .history-card {
-    background: rgba(15, 23, 42, 0.5);
+    background: rgba(13, 20, 38, 0.6);
     border: 1px solid var(--card-border);
-    border-radius: 14px;
-    padding: 14px;
+    border-radius: 16px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    transition: all 0.2s ease;
+    gap: 12px;
+    transition: all 0.25s ease;
   }
 
   .history-card:hover {
-    border-color: rgba(99, 102, 241, 0.3);
-    transform: translateY(-2px);
+    border-color: rgba(99, 102, 241, 0.4);
+    transform: translateY(-3px);
   }
 
   .history-title {
     font-size: 13px;
-    font-weight: 600;
-    line-height: 1.3;
+    font-weight: 700;
+    line-height: 1.35;
     color: var(--text-main);
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -763,119 +704,98 @@
     overflow: hidden;
   }
 
-  .history-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 11px;
-    color: var(--text-dim);
-  }
+  .history-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-dim); }
 
   /* Error Box */
   .error-box {
     display: none;
-    background: rgba(244, 63, 94, 0.1);
-    border: 1px solid rgba(244, 63, 94, 0.3);
-    border-radius: 16px;
-    padding: 18px;
+    background: rgba(244, 63, 94, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    border-radius: 18px;
+    padding: 20px;
     color: #FDA4AF;
     font-size: 14px;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     animation: fadeIn 0.3s ease;
   }
-
   .error-box.visible { display: flex; }
 
   /* Toast Notification */
   .toast {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    bottom: 35px;
+    right: 35px;
     background: var(--primary);
     color: white;
-    padding: 12px 20px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 600;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    padding: 14px 24px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.6);
     transform: translateY(100px);
     opacity: 0;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 100;
   }
+  .toast.visible { transform: translateY(0); opacity: 1; }
 
-  .toast.visible {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  /* Keyframe Animations */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 
   @media (max-width: 640px) {
-    .hero-title { font-size: 30px; }
+    .hero-title { font-size: 32px; }
     .pipeline-steps { grid-template-columns: repeat(2, 1fr); }
-    .glass-card { padding: 24px; }
+    .glass-card { padding: 26px; }
     .url-input { padding-right: 140px; }
   }
 </style>
 </head>
 <body>
 
-  <!-- Ambient Glowing Mesh Backdrop -->
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-  <div class="grid-pattern"></div>
+  <!-- HTML5 Interactive Constellation Canvas -->
+  <canvas id="bgCanvas"></canvas>
 
   <div class="app-container">
 
-    <!-- Navbar -->
+    <!-- Navigation Header -->
     <nav class="navbar">
       <div class="brand">
         <div class="brand-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
-            <polyline points="10 9 9 9 8 9"></polyline>
           </svg>
         </div>
-        <span>YOUTUBE INTEL</span>
+        <span>YOUTUBE INTEL ENGINE</span>
       </div>
       <div class="status-badge">
         <div class="status-dot"></div>
-        <span>AI Engine Ready</span>
+        <span>AI Engine Online</span>
       </div>
     </nav>
 
-    <!-- Hero Section -->
+    <!-- Hero Header -->
     <header class="hero">
       <div class="hero-pill">
-        <span>✦ Executive AI PDF Generator</span>
+        <span>✦ Persona-Tuned AI PDF Generator</span>
       </div>
-      <h1 class="hero-title">Exhaustive Video Intelligence Reports</h1>
+      <h1 class="hero-title">Exhaustive Intelligence & PDF Reports</h1>
       <p class="hero-subtitle">
-        Transform long YouTube talks and tutorials into publication-grade executive summaries, structured key concepts, glossaries, and downloadable PDF reports.
+        Turn academic lectures, sports matches, movies, coding tutorials, and podcasts into custom, publication-grade executive summaries, structured notes, and downloadable PDFs.
       </p>
     </header>
 
-    <!-- Main Card Form -->
+    <!-- Main Form Glass Card -->
     <main class="glass-card">
-      <form id="summarizeForm" class="input-group">
+      <form id="summarizeForm" class="form-section">
+        
+        <!-- Input Bar -->
         <div class="input-wrapper">
           <div class="input-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
           </div>
@@ -883,7 +803,7 @@
             type="text" 
             id="urlInput" 
             class="url-input" 
-            placeholder="Paste YouTube Video URL (e.g., https://youtube.com/watch?v=...)" 
+            placeholder="Paste YouTube URL (e.g., https://www.youtube.com/watch?v=...)" 
             required 
             autocomplete="off"
           />
@@ -897,34 +817,94 @@
 
         <!-- Live YouTube Thumbnail Card -->
         <div id="ytPreview" class="yt-preview-card">
-          <img id="ytThumbImg" class="yt-thumbnail" src="" alt="Thumbnail Preview" />
+          <img id="ytThumbImg" class="yt-thumbnail" src="" alt="Thumbnail" />
           <div class="yt-info">
-            <span class="yt-video-id" id="ytVideoIdTag">ID: -</span>
-            <div class="yt-title-placeholder" id="ytPreviewTitle">Ready to process video transcript...</div>
+            <span class="yt-badge" id="ytVideoIdTag">ID: -</span>
+            <div class="yt-title-text" id="ytPreviewTitle">Video detected...</div>
+          </div>
+        </div>
+
+        <!-- Content Persona Mode Selector -->
+        <div class="category-section">
+          <div class="category-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+            <span>Select Video Category & Persona Mode:</span>
+          </div>
+
+          <div class="category-grid" id="categoryGrid">
+            
+            <div class="cat-card selected" data-cat="auto">
+              <div class="cat-icon">🪄</div>
+              <div class="cat-info">
+                <div class="cat-title">Auto-Detect</div>
+                <div class="cat-desc">Intelligent AI domain adaptation</div>
+              </div>
+            </div>
+
+            <div class="cat-card" data-cat="lecture">
+              <div class="cat-icon">🎓</div>
+              <div class="cat-info">
+                <div class="cat-title">Academic Lecture</div>
+                <div class="cat-desc">Study notes, formulas & exam Q&A</div>
+              </div>
+            </div>
+
+            <div class="cat-card" data-cat="sports">
+              <div class="cat-icon">⚽</div>
+              <div class="cat-info">
+                <div class="cat-title">Sports Match</div>
+                <div class="cat-desc">Game flow, key plays & recap stats</div>
+              </div>
+            </div>
+
+            <div class="cat-card" data-cat="movie">
+              <div class="cat-icon">🎬</div>
+              <div class="cat-info">
+                <div class="cat-title">Movie & Review</div>
+                <div class="cat-desc">Narrative arc, plot beats & film verdict</div>
+              </div>
+            </div>
+
+            <div class="cat-card" data-cat="tutorial">
+              <div class="cat-icon">💻</div>
+              <div class="cat-info">
+                <div class="cat-title">Coding & Tech</div>
+                <div class="cat-desc">Step-by-step code, setup & architecture</div>
+              </div>
+            </div>
+
+            <div class="cat-card" data-cat="business">
+              <div class="cat-icon">📊</div>
+              <div class="cat-info">
+                <div class="cat-title">Business Brief</div>
+                <div class="cat-desc">Market analysis, ROI & key metrics</div>
+              </div>
+            </div>
+
+            <div class="cat-card" data-cat="podcast">
+              <div class="cat-icon">🎙️</div>
+              <div class="cat-info">
+                <div class="cat-title">Podcast & Interview</div>
+                <div class="cat-desc">Guest insights, quotes & topic shifts</div>
+              </div>
+            </div>
+
           </div>
         </div>
 
         <button type="submit" id="submitBtn" class="submit-btn">
-          <span>Generate Executive PDF Report</span>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+          <span>Generate Persona PDF Report</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
         </button>
       </form>
 
-      <!-- Sample Videos Row -->
-      <div class="samples-section">
-        <span class="samples-label">Quick Samples:</span>
-        <button class="sample-chip" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ">Classic Music</button>
-        <button class="sample-chip" data-url="https://www.youtube.com/watch?v=jNQXAC9IVRw">First YouTube Video</button>
-        <button class="sample-chip" data-url="https://www.youtube.com/watch?v=L_LUpnjgPso">AI Tech Talk</button>
-      </div>
-
       <!-- Error Message Box -->
       <div id="errorBox" class="error-box">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
         <span id="errorText">An error occurred while processing.</span>
       </div>
 
-      <!-- Pipeline Progress Stepper -->
+      <!-- Pipeline Stepper Visualizer -->
       <div id="pipelineBox" class="pipeline-box">
         <div class="pipeline-steps">
           <div class="step-card" id="step1">
@@ -937,7 +917,7 @@
           </div>
           <div class="step-card" id="step3">
             <div class="step-num">3</div>
-            <span class="step-title">Deep Synthesis</span>
+            <span class="step-title">Persona Synthesis</span>
           </div>
           <div class="step-card" id="step4">
             <div class="step-num">4</div>
@@ -950,7 +930,7 @@
         </div>
 
         <div class="status-message">
-          <svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite;"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="animation: spin 1s linear infinite;"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>
           <span id="statusText">Initializing background task...</span>
         </div>
       </div>
@@ -959,8 +939,8 @@
       <div id="resultContainer" class="result-container">
         <div class="success-banner">
           <div class="success-info">
-            <div id="resultTitle" class="success-title">Executive Summary Generated</div>
-            <div id="resultMeta" class="success-subtitle">Publication-grade PDF is ready for instant download</div>
+            <div id="resultTitle" class="success-title">Executive Report Generated</div>
+            <div id="resultMeta" class="success-subtitle">Publication-grade PDF is ready for download</div>
           </div>
           <div class="action-buttons">
             <a id="downloadPdfBtn" href="#" class="download-btn" download>
@@ -1010,12 +990,10 @@
     <!-- Recent History Grid -->
     <section class="history-section">
       <div class="section-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-        <span>Recent Intelligence Reports</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818CF8" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span>Recent Reports</span>
       </div>
-      <div id="historyGrid" class="history-grid">
-        <!-- Rendered dynamically -->
-      </div>
+      <div id="historyGrid" class="history-grid"></div>
     </section>
 
   </div>
@@ -1024,7 +1002,74 @@
   <div id="toast" class="toast">Action completed successfully</div>
 
 <script>
-  // DOM Elements
+  // Constellation Starfield Background Canvas
+  const canvas = document.getElementById('bgCanvas');
+  const ctx = canvas.getContext('2d');
+  let width, height;
+  let particles = [];
+  let mouse = { x: null, y: null };
+
+  function initCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    particles = [];
+    const count = Math.floor((width * height) / 18000);
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        radius: Math.random() * 1.8 + 0.5,
+        alpha: Math.random() * 0.5 + 0.2
+      });
+    }
+  }
+
+  function renderCanvas() {
+    ctx.clearRect(0, 0, width, height);
+
+    for (let i = 0; i < particles.length; i++) {
+      let p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0) p.x = width;
+      if (p.x > width) p.x = 0;
+      if (p.y < 0) p.y = height;
+      if (p.y > height) p.y = 0;
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(168, 85, 247, ${p.alpha})`;
+      ctx.fill();
+
+      // Connect near particles
+      for (let j = i + 1; j < particles.length; j++) {
+        let p2 = particles[j];
+        let dx = p.x - p2.x;
+        let dy = p.y - p2.y;
+        let dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 100) {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = `rgba(99, 102, 241, ${0.15 * (1 - dist / 100)})`;
+          ctx.lineWidth = 0.6;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(renderCanvas);
+  }
+
+  window.addEventListener('resize', initCanvas);
+  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+  initCanvas();
+  renderCanvas();
+
+  // Application Logic
   const summarizeForm = document.getElementById('summarizeForm');
   const urlInput = document.getElementById('urlInput');
   const pasteBtn = document.getElementById('pasteBtn');
@@ -1054,8 +1099,18 @@
   const historyGrid = document.getElementById('historyGrid');
   const toast = document.getElementById('toast');
 
+  let selectedCategory = 'auto';
   let pollTimer = null;
   let currentSummaryData = null;
+
+  // Category Selection Handler
+  document.querySelectorAll('.cat-card').forEach(card => {
+    card.addEventListener('click', () => {
+      document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+      selectedCategory = card.dataset.cat;
+    });
+  });
 
   // Extract YouTube ID
   function getYouTubeId(url) {
@@ -1091,15 +1146,7 @@
     }
   });
 
-  // Sample Chips
-  document.querySelectorAll('.sample-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      urlInput.value = chip.dataset.url;
-      urlInput.dispatchEvent(new Event('input'));
-    });
-  });
-
-  // Submit Handler
+  // Form Submit
   summarizeForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const url = urlInput.value.trim();
@@ -1111,18 +1158,18 @@
     pipelineBox.classList.add('visible');
     submitBtn.disabled = true;
 
-    updatePipelineProgress('fetching_transcript', 'Connecting to YouTube API...');
+    updatePipelineProgress('fetching_transcript', 'Fetching video transcript...');
 
     try {
       const res = await fetch('/summarize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url }),
+        body: JSON.stringify({ url: url, category: selectedCategory }),
       });
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: res.statusText }));
-        throw new Error(err.detail || 'Failed to initialize request');
+        throw new Error(err.detail || 'Failed to start pipeline');
       }
 
       const data = await res.json();
@@ -1139,7 +1186,7 @@
     pollTimer = setInterval(async () => {
       try {
         const res = await fetch(`/status/${jobId}`);
-        if (!res.ok) throw new Error('Lost connection to job server');
+        if (!res.ok) throw new Error('Lost connection to job');
         const job = await res.json();
 
         updatePipelineProgress(job.status, job.progress_message);
@@ -1168,17 +1215,15 @@
   // Pipeline Stepper Progress Visualizer
   function updatePipelineProgress(status, message) {
     statusText.textContent = message || status;
-
-    // Reset steps
     [step1, step2, step3, step4].forEach(s => s.className = 'step-card');
 
     if (status === 'pending' || status === 'fetching_transcript') {
       step1.classList.add('active');
-      progressFill.style.width = '20%';
+      progressFill.style.width = '25%';
     } else if (status === 'chunking') {
       step1.classList.add('completed');
       step2.classList.add('active');
-      progressFill.style.width = '45%';
+      progressFill.style.width = '50%';
     } else if (status === 'summarizing_chunks' || status === 'synthesizing') {
       step1.classList.add('completed');
       step2.classList.add('completed');
@@ -1199,8 +1244,8 @@
   // Render Result & Interactive Viewer
   function showResult(job) {
     currentSummaryData = job.summary;
-    resultTitle.textContent = job.video_title || 'Executive Intelligence Report';
-    resultMeta.textContent = `PDF Ready • ${job.summary ? (job.summary.sections?.length || 0) : 0} Sections Analyzed`;
+    resultTitle.textContent = job.video_title || 'Executive Report';
+    resultMeta.textContent = `Persona: ${(job.category || 'auto').toUpperCase()} • PDF Ready`;
     downloadPdfBtn.href = `/download/${job.job_id}`;
     resultContainer.classList.add('visible');
 
@@ -1209,18 +1254,14 @@
     }
   }
 
-  // Render Inline Summary Tabs
   function renderInlineSummary(s) {
-    // Overview
     document.getElementById('overviewText').innerHTML = escapeHtml(s.overview || 'No overview provided.');
 
-    // Takeaways
     const takeawaysList = document.getElementById('takeawaysList');
     takeawaysList.innerHTML = (s.key_takeaways || []).map(t => 
       `<div class="takeaway-card"><b>•</b> ${escapeHtml(t)}</div>`
     ).join('');
 
-    // Sections
     const sectionsList = document.getElementById('sectionsList');
     sectionsList.innerHTML = (s.sections || []).map((sec, idx) => `
       <div class="section-block">
@@ -1229,13 +1270,12 @@
           ${sec.timestamp ? `<span class="timestamp-tag">${escapeHtml(sec.timestamp)}</span>` : ''}
         </div>
         <ul style="padding-left: 20px; color: var(--text-muted);">
-          ${(sec.bullets || []).map(b => `<li style="margin-bottom: 4px;">${escapeHtml(b)}</li>`).join('')}
+          ${(sec.bullets || []).map(b => `<li style="margin-bottom: 5px;">${escapeHtml(b)}</li>`).join('')}
         </ul>
         ${sec.detail ? `<p style="margin-top: 8px; font-size: 13px; color: var(--text-dim);">${escapeHtml(sec.detail)}</p>` : ''}
       </div>
     `).join('');
 
-    // Terms
     const termsGrid = document.getElementById('termsGrid');
     termsGrid.innerHTML = (s.key_terms || []).map(kt => `
       <div class="term-card">
@@ -1244,7 +1284,6 @@
       </div>
     `).join('');
 
-    // Q&A
     const qaList = document.getElementById('qaList');
     qaList.innerHTML = (s.deep_dive_qa || []).map((qa, i) => `
       <div class="qa-card">
@@ -1264,7 +1303,7 @@
     });
   });
 
-  // Copy Takeaways to Clipboard
+  // Copy Takeaways
   copyTakeawaysBtn.addEventListener('click', () => {
     if (!currentSummaryData || !currentSummaryData.key_takeaways) return;
     const text = `Key Takeaways:\n` + currentSummaryData.key_takeaways.map(t => `- ${t}`).join('\n');
@@ -1274,20 +1313,21 @@
 
   // History Store
   function saveToHistory(job) {
-    let history = JSON.parse(localStorage.getItem('yt_pdf_history') || '[]');
+    let history = JSON.parse(localStorage.getItem('yt_pdf_history_v2') || '[]');
     history = history.filter(h => h.job_id !== job.job_id);
     history.unshift({
       job_id: job.job_id,
       title: job.video_title || 'Untitled Video',
       url: job.url,
+      category: job.category || 'auto',
       date: new Date().toLocaleDateString()
     });
-    localStorage.setItem('yt_pdf_history', JSON.stringify(history.slice(0, 8)));
+    localStorage.setItem('yt_pdf_history_v2', JSON.stringify(history.slice(0, 8)));
     loadHistory();
   }
 
   function loadHistory() {
-    const history = JSON.parse(localStorage.getItem('yt_pdf_history') || '[]');
+    const history = JSON.parse(localStorage.getItem('yt_pdf_history_v2') || '[]');
     if (history.length === 0) {
       historyGrid.innerHTML = `<div style="font-size: 13px; color: var(--text-dim);">No previous reports generated yet.</div>`;
       return;
@@ -1298,11 +1338,11 @@
       const thumb = vId ? `https://img.youtube.com/vi/${vId}/hqdefault.jpg` : '';
       return `
         <div class="history-card">
-          ${thumb ? `<img src="${thumb}" style="width: 100%; height: 110px; object-fit: cover; border-radius: 8px;" />` : ''}
+          ${thumb ? `<img src="${thumb}" style="width: 100%; height: 115px; object-fit: cover; border-radius: 10px;" />` : ''}
           <div class="history-title">${escapeHtml(item.title)}</div>
           <div class="history-meta">
-            <span>${item.date}</span>
-            <a href="/download/${item.job_id}" style="color: var(--primary); text-decoration: none; font-weight: 600;" download>PDF ➔</a>
+            <span style="text-transform: uppercase; font-weight: 700; color: var(--accent-teal);">${escapeHtml(item.category)}</span>
+            <a href="/download/${item.job_id}" style="color: var(--primary); text-decoration: none; font-weight: 700;" download>PDF ➔</a>
           </div>
         </div>
       `;
@@ -1330,7 +1370,6 @@
     return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
-  // Load history on start
   loadHistory();
 </script>
 </body>

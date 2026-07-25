@@ -107,6 +107,10 @@ class QAPair(BaseModel):
 class VideoSummary(BaseModel):
     """The final structured document that gets rendered into the PDF."""
     title: str = Field(description="A clear, descriptive title for the video/document")
+    category: Optional[str] = Field(
+        default="auto",
+        description="Content category style used for formatting",
+    )
     tagline: Optional[str] = Field(
         default=None,
         description="A punchy 1-sentence summary capturing the core theme",
@@ -162,6 +166,10 @@ class JobStatus(str, Enum):
 
 class SummarizeRequest(BaseModel):
     url: str = Field(description="Any standard YouTube video URL")
+    category: Optional[str] = Field(
+        default="auto",
+        description="Category/Persona mode: 'auto', 'lecture', 'sports', 'movie', 'tutorial', 'business', 'podcast'",
+    )
 
 
 class SummarizeResponse(BaseModel):
@@ -174,6 +182,7 @@ class JobRecord(BaseModel):
     status: JobStatus = JobStatus.PENDING
     progress_message: str = "Queued"
     url: str
+    category: str = "auto"
     video_id: Optional[str] = None
     video_title: Optional[str] = None
     used_whisper_fallback: bool = False
@@ -183,4 +192,5 @@ class JobRecord(BaseModel):
     error: Optional[str] = None
     created_at: float
     updated_at: float
+
 
