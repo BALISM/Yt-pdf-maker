@@ -173,16 +173,137 @@ def chunk_by_timestamp_gaps(
     return chunks
 
 
+def chunk_by_chapters(
+    segments: List[TranscriptSegment],
+    chapters: List[VideoChapter] | None,
+    target_tokens: int | None = None,
+    min_ratio: float = 0.5,
+    max_ratio: float = 1.5,
+) -> List[TranscriptChunk]:
+    """
+    Groups segments by the video's official chapters.
+    Falls back to chunk_by_timestamp_gaps if no chapters exist.
+    If a chapter is too long (> target * max_ratio), it is split using timestamp gaps.
+    If a chapter is too short (< target * min_ratio), it is merged with adjacent chapters.
+    """
+    if not segments:
+        return []
+    if not chapters:
+        return chunk_by_timestamp_gaps(segments, target_tokens)
+
+    target = target_tokens or settings.chunk_target_tokens
+
+    # Sort chapters by start time
+    sorted_chapters = sorted(chapters, key=lambda c: c.start_time)
+
+    # Map segments to chapters
+    chapter_segments: List[List[TranscriptSegment]] = [[] for _ in sorted_chapters]
+
+    for seg in segments:
+        assigned = False
+        for idx, ch in enumerate(sorted_chapters):
+            if ch.start_time <= seg.start < ch.end_time:
+                chapter_segments[idx].append(seg)
+                assigned = True
+                break
+        if not assigned:
+            # Assign to the closest chapter by start or end time
+            best_idx = 0
+            best_diff = float("inf")
+            for idx, ch in enumerate(sorted_chapters):
+                diff = min(abs(seg.start - ch.start_time), abs(seg.start - ch.end_time))
+                if diff < best_diff:
+                    best_diff = diff
+                    best_idx = idx
+            chapter_segments[best_idx].append(seg)
+
+    raw_chunks: List[dict] = []
+
+    for idx, ch in enumerate(sorted_chapters):
+        ch_segs = chapter_segments[idx]
+        if not ch_segs:
+            continue
+
+        ch_text = " ".join(s.text.strip() for s in ch_segs if s.text.strip())
+        ch_tokens = estimate_tokens(ch_text)
+
+        # Split if chapter is too long
+        if ch_tokens > target * max_ratio:
+            sub_chunks = chunk_by_timestamp_gaps(ch_segs, target_tokens=target)
+            for sc in sub_chunks:
+                raw_chunks.append({
+                    "text": sc.text,
+                    "start_time": sc.start_time,
+                    "end_time": sc.end_time,
+                    "title": f"{ch.title} (Part)",
+                })
+        else:
+            raw_chunks.append({
+                "text": ch_text,
+                "start_time": ch_segs[0].start,
+                "end_time": ch_segs[-1].end,
+                "title": ch.title,
+            })
+
+    if not raw_chunks:
+        return chunk_by_timestamp_gaps(segments, target_tokens)
+
+    # Merge small chapters
+    merged_chunks: List[dict] = []
+    current = None
+
+    for chunk in raw_chunks:
+        if current is None:
+            current = chunk
+            continue
+
+        current_tokens = estimate_tokens(current["text"])
+        if current_tokens < target * min_ratio:
+            current["text"] = current["text"] + " " + chunk["text"]
+            current["end_time"] = chunk["end_time"]
+            current["title"] = f"{current['title']} & {chunk['title']}"
+        else:
+            merged_chunks.append(current)
+            current = chunk
+
+    if current is not None:
+        if merged_chunks and estimate_tokens(current["text"]) < target * min_ratio:
+            merged_chunks[-1]["text"] = merged_chunks[-1]["text"] + " " + current["text"]
+            merged_chunks[-1]["end_time"] = current["end_time"]
+            merged_chunks[-1]["title"] = f"{merged_chunks[-1]['title']} & {current['title']}"
+        else:
+            merged_chunks.append(current)
+
+    # Convert to TranscriptChunk list
+    final_chunks: List[TranscriptChunk] = []
+    for i, mc in enumerate(merged_chunks):
+        prefix = f"[{mc['title']}] "
+        final_chunks.append(
+            TranscriptChunk(
+                index=i,
+                text=prefix + mc["text"],
+                start_time=mc["start_time"],
+                end_time=mc["end_time"],
+            )
+        )
+
+    return final_chunks
+
+
 def chunk_transcript(
     segments: List[TranscriptSegment],
-    strategy: str = "timestamp_gap",
+    strategy: str = "chapter_aware",
+    chapters: List[VideoChapter] | None = None,
 ) -> List[TranscriptChunk]:
     """Single entry point the rest of the app calls."""
     if strategy == "naive":
         return naive_chunk_by_words(segments)
     if strategy == "timestamp_gap":
         return chunk_by_timestamp_gaps(segments)
+    if strategy == "chapter_aware":
+        return chunk_by_chapters(segments, chapters)
     raise ValueError(f"Unknown chunking strategy: {strategy}")
+
 
 
 def format_timestamp(seconds: float) -> str:

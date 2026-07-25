@@ -94,6 +94,52 @@ def test_estimate_tokens_scales_with_length():
     assert long > short * 50  # roughly linear, generous bound to avoid flakiness
 
 
+def test_chunk_by_chapters_normal_and_fallbacks():
+    from app.models import TranscriptSegment, VideoChapter
+    from app.chunking import chunk_by_chapters, chunk_transcript
+
+    # Setup dummy segments covering 0s to 120s
+    segments = [
+        TranscriptSegment(text=f"word {i}", start=float(i * 10), duration=5.0)
+        for i in range(12)
+    ]
+
+    # Test clean fallback if chapters is empty or None
+    fallback_chunks = chunk_by_chapters(segments, chapters=None, target_tokens=50)
+    assert len(fallback_chunks) > 0
+
+    # Setup 3 chapters
+    chapters = [
+        VideoChapter(title="Intro", start_time=0.0, end_time=40.0),
+        VideoChapter(title="Deep Dive", start_time=40.0, end_time=80.0),
+        VideoChapter(title="Conclusion", start_time=80.0, end_time=120.0),
+    ]
+
+    # Test chapter chunking under normal conditions (no merge/split)
+    chunks = chunk_by_chapters(segments, chapters, target_tokens=100, min_ratio=0.0)
+    # Since we have 3 chapters and min_ratio is 0.0, they won't merge
+    assert len(chunks) == 3
+    assert "[Intro]" in chunks[0].text
+    assert "[Deep Dive]" in chunks[1].text
+    assert "[Conclusion]" in chunks[2].text
+
+
+    # Test splitting chapter that is too long
+    # Target size very small to trigger splits
+    split_chunks = chunk_by_chapters(segments, chapters, target_tokens=2, max_ratio=1.1)
+    assert len(split_chunks) > 3
+    # Check that at least one has "(Part)" in title
+    has_part = any("(Part)" in c.text for c in split_chunks)
+    assert has_part
+
+    # Test merging chapters that are too short
+    # Target size very large to trigger merges
+    merge_chunks = chunk_by_chapters(segments, chapters, target_tokens=1000, min_ratio=0.8)
+    assert len(merge_chunks) == 1
+    assert "Intro & Deep Dive & Conclusion" in merge_chunks[0].text
+
+
 if __name__ == "__main__":
     import pytest
     sys.exit(pytest.main([__file__, "-v"]))
+

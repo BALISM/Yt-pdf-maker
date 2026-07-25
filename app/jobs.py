@@ -85,8 +85,9 @@ def run_pipeline(job_id: str) -> None:
         # --- Phase 3: chunk if needed -------------------------------------
         if needs_chunking(full_text):
             _update(job, status=JobStatus.CHUNKING, progress_message="Splitting long transcript into chunks...")
-            chunks = chunk_transcript(transcript.segments, strategy="timestamp_gap")
+            chunks = chunk_transcript(transcript.segments, strategy="chapter_aware", chapters=transcript.chapters)
             _update(job, num_chunks=len(chunks))
+
 
             # --- Phase 4: map-reduce summarization -------------------------
             _update(
