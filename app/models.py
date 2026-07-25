@@ -27,6 +27,11 @@ class TranscriptSegment(BaseModel):
     def end(self) -> float:
         return self.start + self.duration
 
+class VideoChapter(BaseModel):
+    title: str
+    start_time: float
+    end_time: float
+
 
 class TranscriptResult(BaseModel):
     video_id: str
@@ -35,8 +40,10 @@ class TranscriptResult(BaseModel):
     is_generated: bool = True
     source: str = "captions"  # "captions" | "whisper"
     segments: List[TranscriptSegment]
+    chapters: Optional[List[VideoChapter]] = None
 
     @property
+
     def full_text(self) -> str:
         return " ".join(s.text.strip() for s in self.segments if s.text.strip())
 

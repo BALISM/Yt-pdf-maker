@@ -278,6 +278,34 @@ def _fetch_via_whisper(video_id: str) -> TranscriptResult:
             raise NoTranscriptAvailable(f"Whisper transcription failed: {e}") from e
 
 
+def _fetch_chapters(url: str) -> List[VideoChapter] | None:
+    """Try to extract chapter information from YouTube metadata using yt-dlp."""
+    try:
+        import yt_dlp
+        from app.models import VideoChapter
+        ydl_opts = {
+            "extract_flat": False,
+            "skip_download": True,
+            "quiet": True,
+            "no_warnings": True,
+        }
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            raw_chapters = info.get("chapters")
+            if raw_chapters:
+                return [
+                    VideoChapter(
+                        title=c.get("title", f"Chapter {i+1}"),
+                        start_time=float(c.get("start_time", 0.0)),
+                        end_time=float(c.get("end_time", 0.0)),
+                    )
+                    for i, c in enumerate(raw_chapters)
+                ]
+    except Exception as e:
+        logger.warning("Failed to fetch chapters metadata via yt-dlp: %s", e)
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Public entry point
 # ---------------------------------------------------------------------------
@@ -302,8 +330,13 @@ def get_transcript(url: str, allow_whisper_fallback: bool = True) -> TranscriptR
             f"{settings.max_video_duration_seconds/60:.0f} min limit"
         )
 
+    # Fetch and attach chapters metadata
+    from app.models import VideoChapter
+    result.chapters = _fetch_chapters(url)
+
     return result
 
 
 def transcript_to_text(result: TranscriptResult) -> str:
     return result.full_text
+
