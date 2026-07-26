@@ -192,9 +192,15 @@ This is one segment of a longer YouTube video transcript (segment \
 in the video). Auto-generated captions, so expect minor typos and no \
 punctuation in places.
 
-Summarize ONLY what is discussed in this segment with maximum detail and analytical depth:
+Extract and explain what is discussed in this segment with maximum detail and analytical depth. \
+Where the speaker mentions a concept briefly, use your own expert knowledge to expand the explanation \
+with formal definitions, examples, or technical context.
+
 - heading: A descriptive heading capturing the core theme/topic of this segment.
-- bullets: 3-8 rich, multi-sentence bullet points capturing exact facts, numbers, equations, technical terms, methodologies, and reasoning discussed in the segment. Each bullet must be self-contained and descriptive.
+- bullets: 4-8 rich, multi-sentence bullet points. Each bullet must:
+  - Capture the exact facts, numbers, equations, technical terms, and reasoning discussed
+  - Expand on concepts using your own knowledge where the speaker's explanation is brief or incomplete
+  - Be self-contained and educational — a reader should learn the concept from the bullet alone
 - key_quote: (Optional) Any notable quote or key statement in this segment.
 
 Segment transcript:
@@ -246,33 +252,39 @@ def summarize_chunk(chunk: TranscriptChunk, total_chunks: int) -> ChunkSummary:
 # ---------------------------------------------------------------------------
 
 _SYNTHESIS_PROMPT = """\
-You are given section summaries produced from consecutive segments of ONE YouTube video, in chronological order.
+You are an expert subject-matter specialist. You are given section summaries produced from consecutive segments of ONE YouTube video, in chronological order.
 
-Your task is to synthesize all segment summaries into ONE master executive intelligence document of extremely high depth and educational quality:
+Your task is to synthesize all segment summaries into ONE master intelligence document of textbook-quality depth:
+
+IMPORTANT — DO NOT JUST MERGE THE SUMMARIES:
+1. Identify the core academic/professional topic from the segment summaries.
+2. Use your own expert knowledge to ENRICH the content: add formal definitions, additional examples, deeper explanations, mathematical notation, and context that the original video may not have covered thoroughly.
+3. The final document should be a standalone educational resource — a reader should be able to learn the topic fully from this document alone.
 
 {category_instruction}
 
 - title: Descriptive title.
 - tagline: 1-sentence punchy subtitle.
 - estimated_read_time: Estimated read time (e.g., "15 min read").
-- overview: A thorough, multi-paragraph Executive Summary (at least 2-3 dense paragraphs) explaining background context, problem, solution, and educational/practical implications.
-- key_takeaways: 5-8 top core takeaways (no duplicates, high density, rich information explaining the "why").
+- overview: A thorough Executive Summary (at least 2-3 dense paragraphs) covering: prerequisite knowledge, what the video teaches, why it matters, and key conclusions. Write this like a textbook chapter introduction.
+- key_takeaways: 6-8 top core takeaways (no duplicates). Each must richly explain the concept, its significance, and how it works.
 - sections: Logically merged sections. Each section must contain:
-  - heading: Clear conceptual title.
+  - heading: Clear, educational title.
   - timestamp: Approximate timestamp (MM:SS).
-  - bullets: 3-8 comprehensive, detailed bullet points (each bullet should be 2-3 full sentences explaining the details, facts, examples, or steps).
-  - detail: A dense, explanatory paragraph (3-4 sentences) expanding on the technical or contextual nuances.
-  - key_quote: (Optional) Verbatim quote.
-  - actionable_tips: 1-3 practical action items, recommendations, or key takeaways for this section.
-- key_terms: 4-8 key technical terms/concepts with clear, detailed definitions.
-- deep_dive_qa: 3-6 comprehensive Q&A pairs covering fundamental questions answered by the video. The answers must be fully explained and detailed.
-- conclusion: Final synthesis and summary recommendation (3-4 sentences).
+  - bullets: 4-8 comprehensive bullet points. EACH bullet MUST be 2-4 full sentences with detailed explanations, examples, formulas, or step-by-step reasoning. Augment with your own knowledge.
+  - detail: A dense explanatory paragraph (4-6 sentences) providing deeper context, connecting to prior knowledge, and explaining WHY things work the way they do.
+  - key_quote: (Optional) Verbatim quote from the speaker.
+  - actionable_tips: 1-3 practical action items, study strategies, or conceptual checkpoints.
+- key_terms: 6-10 key terms with rigorous, detailed definitions (2-3 sentences each).
+- deep_dive_qa: 4-6 comprehensive Q&A pairs. Answers must be thorough (paragraph-length) with examples or worked-through solutions.
+- conclusion: Final synthesis (3-5 sentences) covering what was learned, how it fits into the bigger picture, and recommended next steps.
 
 Video title (if known): {video_title}
 
 Segment summaries (JSON):
 {chunk_summaries_json}
 """
+
 
 
 
