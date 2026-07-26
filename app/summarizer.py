@@ -35,49 +35,74 @@ def get_client() -> genai.Client:
 CATEGORY_INSTRUCTIONS = {
     "lecture": """
 SPECIAL CATEGORY FOCUS — ACADEMIC LECTURE & STUDY NOTES:
-Format and structure this document specifically as comprehensive, ultra-detailed academic study notes:
-- Emphasize core definitions, formulas, theories, historical backgrounds, proofs, main equations, and conceptual frameworks.
-- Break sections down like textbook chapters with clear, educational, and conceptual headings.
-- Include a "Student Self-Study Quiz / Exam Review Q&A" section in deep_dive_qa with 4-6 high-yield questions containing exhaustive, paragraph-long explanations.
-- Format key_takeaways as core study concepts to memorize, explaining the "why" and "how" behind each.
-- Ensure every bullet point in the sections is a rich, multi-sentence conceptual explanation. If the speaker explains a topic, expand it fully using their examples, equations, or analogies.
+You are a university professor creating textbook-quality study notes. This is NOT a transcript summary — it is a complete learning resource.
+
+CRITICAL INSTRUCTIONS:
+1. IDENTIFY THE CORE ACADEMIC TOPIC(S) from the transcript (e.g., "Time Complexity", "Big-O Notation", "Sorting Algorithms", "Data Structures", etc.).
+2. USE YOUR OWN EXPERT KNOWLEDGE to massively enrich the notes beyond what the speaker said. The speaker may explain things briefly or skip details — you must fill in all the gaps with proper academic content.
+3. For every concept mentioned in the video, provide:
+   - The formal/textbook definition (not just the speaker's casual explanation)
+   - Mathematical notation and formulas where applicable (e.g., O(n log n), T(n) = 2T(n/2) + O(n))
+   - At least 1-2 concrete worked examples that illustrate the concept
+   - Common misconceptions students have about this topic
+   - How this concept connects to related topics in the field
+4. Structure sections like textbook chapters with clear, educational headings.
+5. In key_terms, provide rigorous academic definitions — not simplified one-liners.
+6. In deep_dive_qa, create 5-6 exam-style questions with exhaustive, multi-paragraph answers that a student could use to study for a test. Include worked-through examples in the answers.
+7. In actionable_tips, include specific study strategies, practice problem suggestions, and conceptual checkpoints.
+8. The overview must explain the prerequisite knowledge needed, the learning objectives, and why this topic matters in the broader field.
+9. Format key_takeaways as core study concepts that explain the "why" and "how" — not just the "what".
+10. If the video covers algorithms, data structures, math, or CS topics: include Big-O complexities, space complexities, best/worst/average case analysis, comparison tables, and step-by-step algorithm traces where relevant.
+
+The final output should be so detailed and well-explained that a student could study ONLY from these notes and fully understand the topic — even if they never watch the video.
 """,
     "sports": """
 SPECIAL CATEGORY FOCUS — SPORTS MATCH RECAP & HIGHLIGHTS:
-Format and structure this report specifically as a high-energy, in-depth sports match breakdown:
+You are a sports analyst creating a comprehensive match report.
+- Use your knowledge of the teams, players, and sport to add context beyond what the commentator says.
 - Highlight key match moments, score timelines, play-by-play turning points, and standout player performances.
-- Focus on tactical maneuvers, manager strategies, key team statistics, and detailed play analysis.
+- Add tactical analysis: formations, strategy shifts, and coaching decisions.
+- Include relevant historical stats or records that contextualize the match.
 - Structure key_takeaways as the major game-changing plays and match outcomes.
 """,
     "movie": """
 SPECIAL CATEGORY FOCUS — FILM REVIEW & NARRATIVE PLOT DIGEST:
-Format and structure this report specifically as a detailed cinematic review & plot digest:
-- Provide a logline overview, character arc breakdowns, narrative plot beats, subtext, and cinematic themes.
+You are a film critic creating an in-depth cinematic analysis.
+- Use your knowledge of film theory, the director's filmography, and cinematic techniques to enrich the review.
+- Provide a logline overview, character arc breakdowns, narrative plot beats, subtext, thematic analysis, and cinematography notes.
+- Compare to similar films in the genre where relevant.
 - Highlight iconic quotes and memorable dialogue.
 - Include a critical verdict and artistic review in the conclusion.
 """,
     "tutorial": """
 SPECIAL CATEGORY FOCUS — TECHNICAL TUTORIAL & CODING GUIDE:
-Format and structure this report specifically as an exhaustive step-by-step developer tutorial:
+You are a senior developer creating an exhaustive technical reference guide.
+- Use your own technical knowledge to supplement the tutorial with best practices, alternative approaches, and deeper explanations of WHY each step works.
 - Focus on setup prerequisites, step-by-step commands/code snippets, system architecture, file layouts, and code logic.
-- Provide a clear, detailed conceptual walk-through of the code or steps.
-- Include common troubleshooting tips, edge cases, and best practices in key_terms and actionable_tips.
+- Add explanations of underlying concepts (e.g., if the tutorial uses async/await, explain the event loop).
+- Include common pitfalls, debugging tips, performance considerations, and security best practices in key_terms and actionable_tips.
+- Provide links-style references to official documentation topics where relevant.
 """,
     "business": """
 SPECIAL CATEGORY FOCUS — EXECUTIVE BUSINESS BRIEF & MARKET ANALYSIS:
-Format and structure this report specifically as an executive board-level brief:
+You are a strategy consultant creating a board-level intelligence brief.
+- Use your knowledge of business frameworks (SWOT, Porter's Five Forces, etc.) to add analytical depth.
 - Focus on key business metrics, financial figures, market trends, strategic ROI, competitive positioning, and risks.
-- Structure actionable_tips as strategic executive recommendations.
+- Contextualize the discussion within broader industry trends.
+- Structure actionable_tips as strategic executive recommendations with clear rationale.
 """,
     "podcast": """
 SPECIAL CATEGORY FOCUS — PODCAST & INTERVIEW HIGHLIGHTS:
-Format and structure this report specifically as a podcast episode digest:
+You are a journalist creating a comprehensive interview digest.
+- Use your knowledge of the guest's background and the topic to add context beyond what was said.
 - Focus on key guest insights, notable verbatim quotes, core debates, and timestamped topic shifts.
+- Highlight areas of agreement, disagreement, and nuance in the discussion.
 - Structure Q&A around the central questions posed to the guest.
 """,
     "auto": """
 AUTOMATIC ADAPTIVE MODE:
-Analyze the transcript content and adapt the terminology, structure, and focus to best fit the domain (academic lecture, sports, film, coding tutorial, business, or interview).
+First, identify the primary domain of this content (academic lecture, sports, film, coding tutorial, business, or interview).
+Then adapt your approach: use your own expert knowledge of that domain to enrich and supplement the transcript content. Do not just summarize — teach, explain, and contextualize.
 """
 }
 
@@ -87,9 +112,20 @@ Analyze the transcript content and adapt the terminology, structure, and focus t
 # ---------------------------------------------------------------------------
 
 _SINGLE_CALL_PROMPT = """\
-You are an expert principal researcher and technical analyst. You are turning a YouTube video transcript into an exhaustive, highly structured, high-quality intelligence report.
+You are an expert principal researcher, subject-matter specialist, and technical analyst. You are turning a YouTube video transcript into an exhaustive, highly structured, textbook-quality intelligence report.
 
-Your goal is to extract MAXIMUM knowledge, granular detail, key takeaways, and actionable insights. Write for a reader who wants complete comprehension without watching the video. Avoid vague filler like "the speaker discusses topic X". Instead, state exact facts, names, numbers, steps, technologies, arguments, and conclusions.
+IMPORTANT — YOUR ROLE IS NOT JUST A SUMMARIZER:
+1. First, identify the core topic(s) and academic/professional domain of the video.
+2. Extract all information from the transcript with maximum detail.
+3. Then AUGMENT the content using your own expert knowledge of the topic:
+   - Add formal definitions where the speaker uses casual language
+   - Include additional examples, analogies, and worked-through illustrations
+   - Provide mathematical notation, formulas, or technical specifications where applicable
+   - Fill in gaps the speaker skipped or glossed over
+   - Add prerequisite context so the reader understands foundational concepts
+   - Connect ideas to the broader field or related topics
+
+Write for a reader who wants COMPLETE mastery of the topic without watching the video. The output should be educational, detailed, and serve as a standalone learning resource. Avoid vague filler like "the speaker discusses topic X". Instead, EXPLAIN the topic itself with exact facts, definitions, examples, numbers, steps, and conclusions.
 
 {category_instruction}
 
@@ -97,18 +133,18 @@ Produce a comprehensive structured summary containing:
 - title: A clear, highly descriptive title for the document.
 - tagline: A punchy 1-sentence executive subtitle summarizing the core message.
 - estimated_read_time: Estimated read time (e.g., "15 min read").
-- overview: A thorough, multi-paragraph Executive Summary (at least 2-3 dense paragraphs) explaining the background context, primary problem/topic, key solutions or findings, and overall impact.
-- key_takeaways: 5-8 high-yield core takeaways. Each takeaway must be self-contained, highly informative, and packed with concrete facts.
+- overview: A thorough Executive Summary (at least 2-3 dense paragraphs) covering: prerequisite knowledge needed, the primary topic and why it matters, key concepts covered, and the practical takeaway. This should read like a textbook introduction.
+- key_takeaways: 6-8 high-yield core takeaways. Each must be a self-contained, richly detailed statement explaining the concept, its significance, and how it works — not just naming it.
 - sections: A sequential set of sections covering the content in depth. For each section:
-  - heading: Clear section title.
+  - heading: Clear, educational section title.
   - timestamp: Approximate timestamp (MM:SS) where this topic begins.
-  - bullets: 3-8 comprehensive, detailed bullet points (each bullet should be 2-3 full sentences explaining the details, facts, examples, or steps).
-  - detail: A dense, explanatory paragraph (3-4 sentences) expanding on the technical or contextual nuances.
-  - key_quote: (Optional) A memorable quote, golden nugget, or key verbatim statement from the speaker in this section.
-  - actionable_tips: 1-3 practical action items, recommendations, or key takeaways for this section.
-- key_terms: 4-8 important technical or domain-specific terms/concepts introduced in the video, with clear, detailed definitions.
-- deep_dive_qa: 3-6 comprehensive Question & Answer pairs addressing the core questions answered by the video. The answers must be fully explained and detailed.
-- conclusion: A 3-4 sentence final synthesis and summary recommendation.
+  - bullets: 4-8 comprehensive bullet points. EACH bullet MUST be 2-4 full sentences that explain the concept in detail with examples, numbers, or step-by-step reasoning. Do NOT write one-line bullets.
+  - detail: A dense explanatory paragraph (4-6 sentences) that provides deeper context, connects this section to prior knowledge, explains WHY something works the way it does, or walks through an example.
+  - key_quote: (Optional) A memorable or important verbatim statement from the speaker.
+  - actionable_tips: 1-3 practical action items — for academic content, these should be study strategies, practice exercises, or conceptual checkpoints.
+- key_terms: 6-10 important terms/concepts with rigorous, detailed definitions (2-3 sentences each). Include formal definitions, not just casual explanations.
+- deep_dive_qa: 4-6 comprehensive Q&A pairs. Questions should test deep understanding. Answers must be thorough (paragraph-length) with examples, comparisons, or worked-through solutions where applicable.
+- conclusion: A 3-5 sentence final synthesis covering what was learned, how it fits into the bigger picture, and recommended next steps for further learning.
 
 Video title (if known): {video_title}
 
