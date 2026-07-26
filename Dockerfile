@@ -21,8 +21,12 @@ COPY requirements.txt .
 # Install Python requirements
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Pre-download and cache faster-whisper model so it doesn't block on first run
+RUN python -c "from faster_whisper import WhisperModel; WhisperModel('base', device='cpu')"
+
 # Copy project files
 COPY . .
+
 
 # Expose FastAPI port
 EXPOSE 8000
